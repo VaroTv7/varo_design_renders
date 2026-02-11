@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, RotateCcw, Server, MessageSquare, Sliders, Info } from 'lucide-react';
+import { X, Save, RotateCcw, Server, MessageSquare, Sliders, Info, Plus, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import '../styles/modal.css';
 
 export interface SystemPrompts {
     styleCheck: string;
@@ -13,6 +14,11 @@ export const DEFAULT_PROMPTS: SystemPrompts = {
     objectIntegration: "Identifica los objetos en las imágenes subidas y determina la mejor ubicación y escala en la escena.",
     finalRender: "Genera un render fotorrealista de alta calidad aplicando el estilo extraído y los objetos a la captura del viewport."
 };
+
+interface Preset {
+    name: string;
+    prompts: SystemPrompts;
+}
 
 interface SettingsModalProps {
     isOpen: boolean;
@@ -52,6 +58,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [format, setFormat] = useState(initialFormat);
     const [history, setHistory] = useState(initialHistory);
 
+    // Presets State
+    const [presets, setPresets] = useState<Preset[]>([]);
+    const [selectedPreset, setSelectedPreset] = useState<string>('');
+
     useEffect(() => {
         if (isOpen) {
             setLocalPrompts(prompts);
@@ -62,6 +72,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setFormat(initialFormat);
             setHistory(initialHistory);
             setActiveTab('api');
+
+            // Load presets
+            const savedPresets = localStorage.getItem('interiorismo_prompt_presets');
+            if (savedPresets) {
+                try {
+                    setPresets(JSON.parse(savedPresets));
+                } catch (e) {
+                    console.error("Failed to parse presets", e);
+                }
+            }
         }
     }, [isOpen, prompts, initialApiKey, initialApiUrl, initialIsDebug, initialUpscale, initialFormat, initialHistory]);
 
@@ -73,6 +93,41 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const handleResetPrompts = () => {
         if (window.confirm('¿Estás seguro de que quieres restaurar todos los prompts a sus valores por defecto?')) {
             setLocalPrompts(DEFAULT_PROMPTS);
+            setSelectedPreset('');
+        }
+    };
+
+    const handleSavePreset = () => {
+        const name = prompt("Nombre para este Preset de Prompts:", "Nuevo Preset");
+        if (name) {
+            const newPreset = { name, prompts: localPrompts };
+            const newPresets = [...presets, newPreset];
+            setPresets(newPresets);
+            localStorage.setItem('interiorismo_prompt_presets', JSON.stringify(newPresets));
+            setSelectedPreset(name);
+            alert(`Preset "${name}" guardado.`);
+        }
+    };
+
+    const handleLoadPreset = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const name = e.target.value;
+        setSelectedPreset(name);
+
+        if (name === '') return;
+
+        const preset = presets.find(p => p.name === name);
+        if (preset) {
+            setLocalPrompts(preset.prompts);
+        }
+    };
+
+    const handleDeletePreset = () => {
+        if (!selectedPreset) return;
+        if (window.confirm(`¿Eliminar preset "${selectedPreset}"?`)) {
+            const newPresets = presets.filter(p => p.name !== selectedPreset);
+            setPresets(newPresets);
+            localStorage.setItem('interiorismo_prompt_presets', JSON.stringify(newPresets));
+            setSelectedPreset('');
         }
     };
 
@@ -112,27 +167,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100, backdropFilter: 'blur(5px)' }}
                     />
                     <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="glass-panel"
-                        style={{
-                            position: 'fixed',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            width: '90%',
-                            maxWidth: '700px',
-                            maxHeight: '90vh', // Use max-height to ensure it never exceeds viewport
-                            height: '85vh',    // Target height
-                            zIndex: 101,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            background: '#1a1a2e',
-                            overflow: 'hidden',
-                            padding: 0,
-                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' // Add strong shadow
-                        }}
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="glass-panel settings-modal"
                     >
                         {/* Header */}
                         <div className="flex-between" style={{ padding: 'var(--spacing-lg)', borderBottom: '1px solid var(--color-border)' }}>
@@ -224,6 +262,48 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             {/* PROMPTS TAB */}
                             {activeTab === 'prompts' && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                                    {/* PRESETS CONTROL */}
+                                    <div className="glass-panel" style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--color-border)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                                            <div style={{ flex: 1, minWidth: '200px' }}>
+                                                <label style={{ display: 'block', marginBottom: '5px', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                                                    Versión / Preset:
+                                                </label>
+                                                <select
+                                                    className="input-field"
+                                                    style={{ width: '100%', padding: '8px' }}
+                                                    value={selectedPreset}
+                                                    onChange={handleLoadPreset}
+                                                >
+                                                    <option value="">-- Personalizado --</option>
+                                                    {presets.map((p, idx) => (
+                                                        <option key={idx} value={p.name}>{p.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+
+                                            <div style={{ display: 'flex', gap: '8px', marginTop: '18px' }}>
+                                                <button
+                                                    onClick={handleSavePreset}
+                                                    title="Guardar como Preset"
+                                                    style={{ background: 'var(--color-accent)', border: 'none', borderRadius: '4px', padding: '8px', color: '#000', cursor: 'pointer' }}
+                                                >
+                                                    <Plus size={18} />
+                                                </button>
+                                                {selectedPreset && (
+                                                    <button
+                                                        onClick={handleDeletePreset}
+                                                        title="Eliminar Preset"
+                                                        style={{ background: 'rgba(255, 50, 50, 0.2)', border: '1px solid rgba(255, 50, 50, 0.5)', borderRadius: '4px', padding: '8px', color: '#ff6b6b', cursor: 'pointer' }}
+                                                    >
+                                                        <Trash2 size={18} />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div className="flex-between">
                                         <p style={{ fontSize: '0.9rem', color: 'var(--color-text-muted)' }}>
                                             Edita las instrucciones internas que guían a la IA en cada paso del proceso.
