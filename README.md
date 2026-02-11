@@ -9,9 +9,14 @@ Esta aplicación está diseñada para arquitectos y diseñadores de interiores q
 ## 🚀 Características Principales
 
 - **Renderizado AI**: Conversión instantánea de geometría básica a imágenes fotorrealistas.
+- **Editor Avanzado de Canvas**:
+    - **Zonas de Muebles**: Dibuja rectángulos para indicar dónde se debe colocar cada objeto.
+    - **Anotaciones (Pincel)**: Dibuja flechas o notas a mano alzada para dar contexto extra a la IA.
+    - **Máscara Inteligente**: El sistema genera automáticamente una máscara de control para la generación.
 - **Control de Estilo**: Sube imágenes de referencia para guiar la estética, iluminación y materiales.
 - **Integración de Mobiliario**: Añade recortes de muebles u objetos específicos que la IA integrará perfectamente en la escena.
 - **Presets de Prompts**: Guarda y carga diferentes versiones de tus instrucciones de sistema (ej. "Minimalista", "Industrial").
+- **Historial Local**: Opción para guardar o no el historial de generaciones.
 - **Ajustes de Salida**: Soporte para Escalado (Upscale) hasta 4x y formatos PNG, WEBP o JPG.
 - **Diseño Responsivo**: Interfaz optimizada para Móviles, Tablets, PC y TV (100% zoom).
 - **Localización Completa**: Interfaz totalmente en español.

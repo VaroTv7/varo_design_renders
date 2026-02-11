@@ -12,6 +12,7 @@ export interface GenerationRequest {
     upscale?: number;
     format?: 'png' | 'webp' | 'jpg';
     history?: boolean;
+    mask?: Blob | null;
 }
 
 export interface GenerationResponse {

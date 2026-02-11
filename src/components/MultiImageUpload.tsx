@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Upload, X, Plus } from 'lucide-react';
+import { X, Plus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export interface ImageReference {
