@@ -46,6 +46,18 @@ Esta aplicación está diseñada para arquitectos y diseñadores de interiores q
     - Desactiva el "Modo Debug".
     - Introduce tu API Key de Nano Banana Pro.
 
+## 🐳 Despliegue con Docker
+
+Puedes desplegar la aplicación fácilmente en cualquier servidor usando Docker.
+
+1.  **Construir y ejecutar**:
+    ```bash
+    docker-compose up -d --build
+    ```
+
+2.  **Acceder**:
+    La aplicación estará disponible en `http://localhost:8080`.
+
 ## 🤝 Contribución
 
 Las contribuciones son bienvenidas. Por favor, abre un issue para discutir cambios mayores antes de enviar un Pull Request.
