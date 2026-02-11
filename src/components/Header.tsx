@@ -27,17 +27,27 @@ const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
             </div>
 
             <nav className="flex-center" style={{ gap: 'var(--spacing-lg)' }}>
-                <button style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+                <button style={{
+                    background: 'none', border: 'none', color: 'var(--color-text-secondary)',
+                    cursor: 'pointer', transition: 'all 0.2s', fontSize: '14px'
+                }} className="hover-highlight">
                     Historial
                 </button>
                 <button
                     onClick={onOpenSettings}
-                    style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', cursor: 'pointer', fontWeight: 500 }}
+                    style={{
+                        background: 'none', border: 'none', color: 'var(--color-text-primary)',
+                        cursor: 'pointer', fontWeight: 500, transition: 'all 0.2s', fontSize: '14px'
+                    }}
+                    className="hover-highlight"
                 >
                     Ajustes
                 </button>
                 <div style={{ width: '1px', height: '20px', background: 'var(--color-border)' }}></div>
-                <button className="flex-center" style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', cursor: 'pointer' }}>
+                <button className="flex-center hover-highlight" style={{
+                    background: 'none', border: 'none', color: 'var(--color-text-primary)',
+                    cursor: 'pointer', transition: 'all 0.2s'
+                }}>
                     <Menu size={24} />
                 </button>
             </nav>

@@ -29,6 +29,13 @@ Esta aplicación está diseñada para arquitectos y diseñadores de interiores q
 - **Iconos**: Lucide React
 - **Animaciones**: Framer Motion
 
+## 🤖 Compatibilidad con Nano Banana Pro / Gemini
+
+Esta aplicación ha sido verificada para funcionar con los modelos **Gemini 1.5 Pro** y **Gemini 2.0 (Nano Banana Pro)**:
+- **Multimodalidad Real**: Puedes subir hasta 10 imágenes de referencia (Estilo + Objetos). La aplicación las envía como partes de un mensaje multimodal entrelazado con texto.
+- **Instrucciones Espaciales**: El Editor de Canvas genera una máscara de control. Al enviar esta máscara junto a tus referencias de objetos, la IA entiende exactamente dónde "colocar" los elementos solicitados.
+- **Contexto Enriquecido**: Los comentarios individuales en cada imagen se adjuntan como metadatos descriptivos en el prompt final.
+
 ## 📦 Instalación y Uso
 
 1.  **Clonar el repositorio**:

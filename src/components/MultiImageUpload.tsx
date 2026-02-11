@@ -24,12 +24,23 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
 }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    // Memory Management: Revoke all previews on unmount
+    React.useEffect(() => {
+        return () => {
+            images.forEach(img => {
+                if (img.preview.startsWith('blob:')) {
+                    URL.revokeObjectURL(img.preview);
+                }
+            });
+        };
+    }, []);
+
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files.length > 0) {
             const newImages: ImageReference[] = Array.from(e.target.files).map(file => ({
                 id: Math.random().toString(36).substr(2, 9) + Date.now().toString(36), // improved uniqueness
                 file,
-                preview: URL.createObjectURL(file), // Note: In a real app complexity, manage URL revocation
+                preview: URL.createObjectURL(file),
                 comment: ''
             }));
 
@@ -39,6 +50,10 @@ const MultiImageUpload: React.FC<MultiImageUploadProps> = ({
     };
 
     const removeImage = (id: string) => {
+        const imgToRemove = images.find(img => img.id === id);
+        if (imgToRemove) {
+            URL.revokeObjectURL(imgToRemove.preview);
+        }
         onImagesChange(images.filter(img => img.id !== id));
     };
 

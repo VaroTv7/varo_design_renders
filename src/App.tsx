@@ -7,13 +7,22 @@ import ResultViewer from './components/ResultViewer'
 import SettingsModal, { DEFAULT_PROMPTS } from './components/SettingsModal'
 import type { SystemPrompts } from './components/SettingsModal'
 import CanvasEditor, { type Zone } from './components/CanvasEditor'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { generateRender } from './services/api'
 import { Edit2, Check } from 'lucide-react'
 
 function App() {
     const [image, setImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    // Memory Management: Revoke preview URLs
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
 
     const [styleRefs, setStyleRefs] = useState<ImageReference[]>([]);
     const [objectRefs, setObjectRefs] = useState<ImageReference[]>([]);
@@ -233,6 +242,7 @@ function App() {
                         <ResultViewer
                             originalImage={previewUrl}
                             generatedImage={result}
+                            userPrompt={prompt}
                         />
                     )}
                 </div>

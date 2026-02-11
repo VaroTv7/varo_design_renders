@@ -1,19 +1,45 @@
-import React from 'react';
-import { Download, Share2, Maximize2 } from 'lucide-react';
+import { Download, Share2, Maximize2, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
 
 interface ResultViewerProps {
     originalImage: string | null;
     generatedImage: string | null;
+    userPrompt?: string;
 }
 
-const ResultViewer: React.FC<ResultViewerProps> = ({ originalImage: _originalImage, generatedImage }) => {
+const ResultViewer: React.FC<ResultViewerProps> = ({ originalImage: _originalImage, generatedImage, userPrompt }) => {
+    const [copied, setCopied] = useState(false);
+
     if (!generatedImage) return null;
+
+    const handleCopyPrompt = () => {
+        if (!userPrompt) return;
+        navigator.clipboard.writeText(userPrompt);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     return (
         <div className="glass-panel" style={{ padding: 'var(--spacing-md)', marginTop: 'var(--spacing-lg)' }}>
             <div className="flex-between" style={{ marginBottom: 'var(--spacing-md)' }}>
                 <h3 style={{ fontSize: 'var(--font-size-md)', fontWeight: 600 }}>Resultado Generado</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
+                    {userPrompt && (
+                        <button
+                            onClick={handleCopyPrompt}
+                            className="btn-secondary"
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: copied ? 'rgba(0, 255, 100, 0.1)' : 'rgba(255,255,255,0.1)',
+                                border: 'none', padding: '6px 12px', borderRadius: '20px',
+                                cursor: 'pointer', color: copied ? '#50fa7b' : 'white',
+                                fontSize: '12px', transition: 'all 0.2s'
+                            }}
+                        >
+                            {copied ? <Check size={14} /> : <Copy size={14} />}
+                            {copied ? '¡Copiado!' : 'Copiar Prompt'}
+                        </button>
+                    )}
                     <button className="btn-secondary" style={{ background: 'rgba(255,255,255,0.1)', border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}>
                         <Download size={18} />
                     </button>
