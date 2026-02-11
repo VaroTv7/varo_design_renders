@@ -1,0 +1,153 @@
+import Layout from './components/Layout'
+import ImageUpload from './components/ImageUpload'
+import MultiImageUpload from './components/MultiImageUpload'
+import type { ImageReference } from './components/MultiImageUpload'
+import PromptInput from './components/PromptInput'
+import ResultViewer from './components/ResultViewer'
+import SettingsModal, { DEFAULT_PROMPTS } from './components/SettingsModal'
+import type { SystemPrompts } from './components/SettingsModal'
+import { useState } from 'react'
+import { Settings } from 'lucide-react'
+
+function App() {
+    const [image, setImage] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+    const [styleRefs, setStyleRefs] = useState<ImageReference[]>([]);
+    const [objectRefs, setObjectRefs] = useState<ImageReference[]>([]);
+
+    const [prompt, setPrompt] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [result, setResult] = useState<string | null>(null);
+
+    const [systemPrompts, setSystemPrompts] = useState<SystemPrompts>(DEFAULT_PROMPTS);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+    const handleImageSelect = (file: File) => {
+        setImage(file);
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+        setResult(null);
+    };
+
+    const handleClear = () => {
+        setImage(null);
+        setPreviewUrl(null);
+        setResult(null);
+    };
+
+    const handleGenerate = async () => {
+        if (!image) return;
+
+        setIsLoading(true);
+
+        // Log inputs for debugging/demo purposes
+        console.log('Generating with:', {
+            viewport: image.name,
+            styleRefs: styleRefs.map(r => ({ id: r.id, comment: r.comment })),
+            objectRefs: objectRefs.map(r => ({ id: r.id, comment: r.comment })),
+            userPrompt: prompt,
+            systemPrompts
+        });
+
+        // Simulate API call
+        setTimeout(() => {
+            setIsLoading(false);
+            setResult(previewUrl);
+        }, 2000);
+    };
+
+    return (
+        <Layout className="flex-center">
+            <button
+                onClick={() => setIsSettingsOpen(true)}
+                style={{
+                    position: 'fixed',
+                    top: '20px',
+                    right: '80px', // Left of the menu button
+                    zIndex: 51,
+                    background: 'rgba(255,255,255,0.1)',
+                    border: 'none',
+                    color: 'white',
+                    padding: '8px',
+                    borderRadius: '50%',
+                    cursor: 'pointer',
+                    backdropFilter: 'blur(5px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                }}
+                title="Ajustes de Prompts"
+            >
+                <Settings size={20} />
+            </button>
+
+            <SettingsModal
+                isOpen={isSettingsOpen}
+                onClose={() => setIsSettingsOpen(false)}
+                prompts={systemPrompts}
+                onSave={setSystemPrompts}
+            />
+
+            <div style={{ maxWidth: '800px', width: '100%', paddingBottom: '100px' }}>
+                <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
+                    <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', background: 'linear-gradient(to right, #64f3d5, #fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800 }}>
+                        Interiorismo AI
+                    </h1>
+                    <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-md)' }}>
+                        Transforma tus capturas del viewport en renders profesionales con IA.
+                    </p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
+                    <ImageUpload
+                        onImageSelect={handleImageSelect}
+                        previewUrl={previewUrl}
+                        onClear={handleClear}
+                        label="1. Captura del Viewport (Base)"
+                    />
+
+                    {previewUrl && (
+                        <div className="glass-panel" style={{ padding: 'var(--spacing-lg)' }}>
+                            <h2 style={{ fontSize: '1.2rem', marginBottom: 'var(--spacing-md)', borderBottom: '1px solid var(--color-border)', paddingBottom: '8px' }}>
+                                2. Contexto y Detalles
+                            </h2>
+
+                            <MultiImageUpload
+                                label="Referencias de Estilo"
+                                images={styleRefs}
+                                onImagesChange={setStyleRefs}
+                                maxImages={5}
+                            />
+
+                            <MultiImageUpload
+                                label="Objetos y Muebles a Integrar"
+                                images={objectRefs}
+                                onImagesChange={setObjectRefs}
+                                maxImages={5}
+                            />
+                        </div>
+                    )}
+
+                    {previewUrl && (
+                        <PromptInput
+                            prompt={prompt}
+                            setPrompt={setPrompt}
+                            onGenerate={handleGenerate}
+                            isLoading={isLoading}
+                        />
+                    )}
+
+                    {result && (
+                        <ResultViewer
+                            originalImage={previewUrl}
+                            generatedImage={result}
+                        />
+                    )}
+                </div>
+            </div>
+        </Layout>
+    )
+}
+
+export default App
