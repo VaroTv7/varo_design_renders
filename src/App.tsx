@@ -21,9 +21,15 @@ function App() {
     const [result, setResult] = useState<string | null>(null);
 
     const [systemPrompts, setSystemPrompts] = useState<SystemPrompts>(DEFAULT_PROMPTS);
-    const [apiKey, setApiKey] = useState('');
-    const [apiUrl, setApiUrl] = useState('https://api.nanobanana.com/v1/generate');
-    const [isDebug, setIsDebug] = useState(true);
+    const [apiKey, setApiKey] = useState(() => localStorage.getItem('interiorismo_api_key') || '');
+    const [apiUrl, setApiUrl] = useState(() => localStorage.getItem('interiorismo_api_url') || 'https://api.nanobanana.com/v1/generate');
+    const [isDebug, setIsDebug] = useState(() => localStorage.getItem('interiorismo_debug') !== 'false'); // Default true
+
+    // Advanced Settings
+    const [upscale, setUpscale] = useState(() => localStorage.getItem('interiorismo_upscale') || '1');
+    const [format, setFormat] = useState(() => localStorage.getItem('interiorismo_format') || 'png');
+    const [history, setHistory] = useState(() => localStorage.getItem('interiorismo_history') === 'true'); // Default false
+
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const handleImageSelect = (file: File) => {
@@ -54,7 +60,10 @@ function App() {
                 systemPrompts,
                 isDebug,
                 apiKey,
-                apiUrl
+                apiUrl,
+                upscale: parseInt(upscale),
+                format: format as 'png' | 'webp' | 'jpg',
+                history
             });
 
             if (response.error) {
@@ -70,11 +79,34 @@ function App() {
         }
     };
 
-    const handleSaveSettings = (prompts: SystemPrompts, newApiKey: string, newApiUrl: string, newIsDebug: boolean) => {
+    const handleSaveSettings = (
+        prompts: SystemPrompts,
+        newApiKey: string,
+        newApiUrl: string,
+        newIsDebug: boolean,
+        newUpscale: string,
+        newFormat: string,
+        newHistory: boolean
+    ) => {
         setSystemPrompts(prompts);
+
         setApiKey(newApiKey);
+        localStorage.setItem('interiorismo_api_key', newApiKey);
+
         setApiUrl(newApiUrl);
+        localStorage.setItem('interiorismo_api_url', newApiUrl);
+
         setIsDebug(newIsDebug);
+        localStorage.setItem('interiorismo_debug', String(newIsDebug));
+
+        setUpscale(newUpscale);
+        localStorage.setItem('interiorismo_upscale', newUpscale);
+
+        setFormat(newFormat);
+        localStorage.setItem('interiorismo_format', newFormat);
+
+        setHistory(newHistory);
+        localStorage.setItem('interiorismo_history', String(newHistory));
     };
 
     return (
@@ -87,6 +119,9 @@ function App() {
                 initialApiKey={apiKey}
                 initialApiUrl={apiUrl}
                 initialIsDebug={isDebug}
+                initialUpscale={upscale}
+                initialFormat={format}
+                initialHistory={history}
             />
 
             <div style={{ maxWidth: '800px', width: '100%', paddingBottom: '100px' }}>

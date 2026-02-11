@@ -18,10 +18,13 @@ interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     prompts: SystemPrompts;
-    onSave: (prompts: SystemPrompts, apiKey: string, apiUrl: string, isDebug: boolean) => void;
+    onSave: (prompts: SystemPrompts, apiKey: string, apiUrl: string, isDebug: boolean, upscale: string, format: string, history: boolean) => void;
     initialApiKey: string;
     initialApiUrl: string;
     initialIsDebug: boolean;
+    initialUpscale: string;
+    initialFormat: string;
+    initialHistory: boolean;
 }
 
 type Tab = 'api' | 'prompts' | 'advanced';
@@ -33,7 +36,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     onSave,
     initialApiKey,
     initialApiUrl,
-    initialIsDebug
+    initialIsDebug,
+    initialUpscale,
+    initialFormat,
+    initialHistory
 }) => {
     const [activeTab, setActiveTab] = useState<Tab>('api');
     const [localPrompts, setLocalPrompts] = useState<SystemPrompts>(prompts);
@@ -41,18 +47,26 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [apiUrl, setApiUrl] = useState(initialApiUrl);
     const [isDebug, setIsDebug] = useState(initialIsDebug);
 
+    // Advanced Settings State
+    const [upscale, setUpscale] = useState(initialUpscale);
+    const [format, setFormat] = useState(initialFormat);
+    const [history, setHistory] = useState(initialHistory);
+
     useEffect(() => {
         if (isOpen) {
             setLocalPrompts(prompts);
             setApiKey(initialApiKey);
             setApiUrl(initialApiUrl);
             setIsDebug(initialIsDebug);
+            setUpscale(initialUpscale);
+            setFormat(initialFormat);
+            setHistory(initialHistory);
             setActiveTab('api');
         }
-    }, [isOpen, prompts, initialApiKey, initialApiUrl, initialIsDebug]);
+    }, [isOpen, prompts, initialApiKey, initialApiUrl, initialIsDebug, initialUpscale, initialFormat, initialHistory]);
 
     const handleSave = () => {
-        onSave(localPrompts, apiKey, apiUrl, isDebug);
+        onSave(localPrompts, apiKey, apiUrl, isDebug, upscale, format, history);
         onClose();
     };
 
@@ -109,13 +123,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             transform: 'translate(-50%, -50%)',
                             width: '90%',
                             maxWidth: '700px',
-                            height: '80vh',
+                            maxHeight: '90vh', // Use max-height to ensure it never exceeds viewport
+                            height: '85vh',    // Target height
                             zIndex: 101,
                             display: 'flex',
                             flexDirection: 'column',
                             background: '#1a1a2e',
                             overflow: 'hidden',
-                            padding: 0
+                            padding: 0,
+                            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' // Add strong shadow
                         }}
                     >
                         {/* Header */}
@@ -258,35 +274,73 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                 </div>
                             )}
 
-                            {/* ADVANCED TAB (Placeholders) */}
+                            {/* ADVANCED TAB */}
                             {activeTab === 'advanced' && (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', opacity: 0.7 }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                                     <div className="glass-panel" style={{ padding: '20px', borderStyle: 'dashed' }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
                                             <Info size={18} color="var(--color-accent)" />
-                                            <h4 style={{ margin: 0 }}>Funciones Experimentales (Próximamente)</h4>
+                                            <h4 style={{ margin: 0 }}>Funciones Avanzadas</h4>
                                         </div>
 
                                         <div style={{ marginBottom: '20px' }}>
-                                            <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-secondary)' }}>Factor de Escalado (Upscale)</label>
-                                            <input type="range" disabled style={{ width: '100%' }} />
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                                <label style={{ color: 'var(--color-text-secondary)' }}>Factor de Escalado (Upscale)</label>
+                                                <span style={{ color: 'var(--color-accent)', fontWeight: 'bold' }}>{upscale}x</span>
+                                            </div>
+                                            <input
+                                                type="range"
+                                                min="1"
+                                                max="4"
+                                                step="1"
+                                                value={upscale}
+                                                onChange={(e) => setUpscale(e.target.value)}
+                                                style={{ width: '100%', cursor: 'pointer' }}
+                                            />
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '4px' }}>
+                                                <span>1x (Original)</span>
+                                                <span>2x (HD)</span>
+                                                <span>3x</span>
+                                                <span>4x (Ultra)</span>
+                                            </div>
                                         </div>
 
                                         <div style={{ marginBottom: '20px' }}>
                                             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-secondary)' }}>Formato de Salida</label>
-                                            <select disabled className="input-field" style={{ width: '100%' }}>
-                                                <option>PNG (Lossless)</option>
-                                                <option>WEBP</option>
-                                                <option>JPG</option>
+                                            <select
+                                                className="input-field"
+                                                value={format}
+                                                onChange={(e) => setFormat(e.target.value)}
+                                                style={{ width: '100%', background: 'rgba(0,0,0,0.3)' }}
+                                            >
+                                                <option value="png">PNG (Lossless)</option>
+                                                <option value="webp">WEBP (Optimized)</option>
+                                                <option value="jpg">JPG (Standard)</option>
                                             </select>
                                         </div>
 
                                         <div>
                                             <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-secondary)' }}>Historial de Renders</label>
-                                            <div className="flex-center" style={{ justifyContent: 'flex-start', gap: '10px' }}>
-                                                <input type="checkbox" disabled />
+                                            <label className="flex-center" style={{ justifyContent: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+                                                <div style={{ position: 'relative', width: '40px', height: '22px' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={history}
+                                                        onChange={(e) => setHistory(e.target.checked)}
+                                                        style={{ opacity: 0, width: 0, height: 0 }}
+                                                    />
+                                                    <span style={{
+                                                        position: 'absolute', cursor: 'pointer', top: 0, left: 0, right: 0, bottom: 0,
+                                                        backgroundColor: history ? 'var(--color-accent)' : '#ccc',
+                                                        transition: '.4s', borderRadius: '34px'
+                                                    }} />
+                                                    <span style={{
+                                                        position: 'absolute', content: '""', height: '16px', width: '16px', left: history ? '20px' : '4px', bottom: '3px',
+                                                        backgroundColor: 'white', transition: '.4s', borderRadius: '50%'
+                                                    }} />
+                                                </div>
                                                 <span style={{ color: 'var(--color-text-muted)' }}>Guardar historial localmente</span>
-                                            </div>
+                                            </label>
                                         </div>
                                     </div>
                                 </div>

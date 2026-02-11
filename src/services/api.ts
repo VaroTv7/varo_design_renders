@@ -9,6 +9,9 @@ export interface GenerationRequest {
     isDebug: boolean;
     apiKey?: string;
     apiUrl?: string;
+    upscale?: number;
+    format?: 'png' | 'webp' | 'jpg';
+    history?: boolean;
 }
 
 export interface GenerationResponse {
