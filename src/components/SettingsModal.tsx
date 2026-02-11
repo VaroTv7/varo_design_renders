@@ -18,26 +18,41 @@ interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     prompts: SystemPrompts;
-    onSave: (prompts: SystemPrompts) => void;
+    onSave: (prompts: SystemPrompts, apiKey: string, isDebug: boolean) => void;
+    initialApiKey: string;
+    initialIsDebug: boolean;
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, prompts, onSave }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({
+    isOpen,
+    onClose,
+    prompts,
+    onSave,
+    initialApiKey,
+    initialIsDebug
+}) => {
     const [localPrompts, setLocalPrompts] = useState<SystemPrompts>(prompts);
+    const [apiKey, setApiKey] = useState(initialApiKey);
+    const [isDebug, setIsDebug] = useState(initialIsDebug);
 
     // Sync local state when prop changes or modal opens
     useEffect(() => {
         if (isOpen) {
             setLocalPrompts(prompts);
+            setApiKey(initialApiKey);
+            setIsDebug(initialIsDebug);
         }
-    }, [isOpen, prompts]);
+    }, [isOpen, prompts, initialApiKey, initialIsDebug]);
 
     const handleSave = () => {
-        onSave(localPrompts);
+        onSave(localPrompts, apiKey, isDebug);
         onClose();
     };
 
     const handleReset = () => {
         setLocalPrompts(DEFAULT_PROMPTS);
+        // Don't reset API key for safety, maybe debug mode yes
+        setIsDebug(true);
     };
 
     return (
@@ -92,6 +107,47 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, prompts,
                         </div>
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
+
+                            {/* API Configuration Section */}
+                            <div style={{ padding: 'var(--spacing-md)', background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-md)' }}>
+                                <h3 style={{ fontSize: '1rem', marginBottom: '12px', color: 'var(--color-accent)' }}>Configuración API</h3>
+
+                                <div style={{ marginBottom: '12px' }}>
+                                    <label className="flex-center" style={{ justifyContent: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={isDebug}
+                                            onChange={(e) => setIsDebug(e.target.checked)}
+                                            style={{ width: '18px', height: '18px', accentColor: 'var(--color-accent)' }}
+                                        />
+                                        <span style={{ fontSize: '0.95rem' }}>Modo Debug (Mock API - Sin coste)</span>
+                                    </label>
+                                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginLeft: '28px', marginTop: '4px' }}>
+                                        Si está activo, no se enviarán peticiones reales a la API. Útil para pruebas.
+                                    </p>
+                                </div>
+
+                                {!isDebug && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                    >
+                                        <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
+                                            API Key (Nano Banana Pro)
+                                        </label>
+                                        <input
+                                            type="password"
+                                            className="input-field"
+                                            value={apiKey}
+                                            onChange={(e) => setApiKey(e.target.value)}
+                                            placeholder="sk-..."
+                                            style={{ background: 'rgba(0,0,0,0.3)' }}
+                                        />
+                                    </motion.div>
+                                )}
+                            </div>
+
+                            {/* Prompts Section */}
                             <div>
                                 <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
                                     Prompt de Análisis de Estilo

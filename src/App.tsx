@@ -8,6 +8,7 @@ import SettingsModal, { DEFAULT_PROMPTS } from './components/SettingsModal'
 import type { SystemPrompts } from './components/SettingsModal'
 import { useState } from 'react'
 import { Settings } from 'lucide-react'
+import { generateRender } from './services/api'
 
 function App() {
     const [image, setImage] = useState<File | null>(null);
@@ -21,6 +22,8 @@ function App() {
     const [result, setResult] = useState<string | null>(null);
 
     const [systemPrompts, setSystemPrompts] = useState<SystemPrompts>(DEFAULT_PROMPTS);
+    const [apiKey, setApiKey] = useState('');
+    const [isDebug, setIsDebug] = useState(true);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
     const handleImageSelect = (file: File) => {
@@ -40,21 +43,36 @@ function App() {
         if (!image) return;
 
         setIsLoading(true);
+        setResult(null);
 
-        // Log inputs for debugging/demo purposes
-        console.log('Generating with:', {
-            viewport: image.name,
-            styleRefs: styleRefs.map(r => ({ id: r.id, comment: r.comment })),
-            objectRefs: objectRefs.map(r => ({ id: r.id, comment: r.comment })),
-            userPrompt: prompt,
-            systemPrompts
-        });
+        try {
+            const response = await generateRender({
+                image,
+                styleRefs,
+                objectRefs,
+                prompt,
+                systemPrompts,
+                isDebug,
+                apiKey
+            });
 
-        // Simulate API call
-        setTimeout(() => {
+            if (response.error) {
+                alert(`Error: ${response.error}`);
+            } else {
+                setResult(response.imageUrl);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Ocurrió un error inesperado al generar el render.');
+        } finally {
             setIsLoading(false);
-            setResult(previewUrl);
-        }, 2000);
+        }
+    };
+
+    const handleSaveSettings = (prompts: SystemPrompts, newApiKey: string, newIsDebug: boolean) => {
+        setSystemPrompts(prompts);
+        setApiKey(newApiKey);
+        setIsDebug(newIsDebug);
     };
 
     return (
@@ -86,7 +104,9 @@ function App() {
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
                 prompts={systemPrompts}
-                onSave={setSystemPrompts}
+                onSave={handleSaveSettings}
+                initialApiKey={apiKey}
+                initialIsDebug={isDebug}
             />
 
             <div style={{ maxWidth: '800px', width: '100%', paddingBottom: '100px' }}>
@@ -97,6 +117,21 @@ function App() {
                     <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-md)' }}>
                         Transforma tus capturas del viewport en renders profesionales con IA.
                     </p>
+                    {isDebug && (
+                        <div style={{
+                            display: 'inline-block',
+                            marginTop: '10px',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            background: 'rgba(255, 193, 7, 0.2)',
+                            color: '#ffc107',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold',
+                            border: '1px solid rgba(255, 193, 7, 0.3)'
+                        }}>
+                            MODO DEBUG ACTIVO (MOCK)
+                        </div>
+                    )}
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem' }}>
@@ -146,7 +181,7 @@ function App() {
                     )}
                 </div>
             </div>
-        </Layout>
+        </Layout >
     )
 }
 
