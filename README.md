@@ -11,9 +11,11 @@ Esta aplicación está diseñada para arquitectos y diseñadores de interiores q
 - **Renderizado AI**: Conversión instantánea de geometría básica a imágenes fotorrealistas.
 - **Control de Estilo**: Sube imágenes de referencia para guiar la estética, iluminación y materiales.
 - **Integración de Mobiliario**: Añade recortes de muebles u objetos específicos que la IA integrará perfectamente en la escena.
+- **Presets de Prompts**: Guarda y carga diferentes versiones de tus instrucciones de sistema (ej. "Minimalista", "Industrial").
+- **Ajustes de Salida**: Soporte para Escalado (Upscale) hasta 4x y formatos PNG, WEBP o JPG.
+- **Diseño Responsivo**: Interfaz optimizada para Móviles, Tablets, PC y TV (100% zoom).
 - **Localización Completa**: Interfaz totalmente en español.
 - **Modo Debug**: Prueba la aplicación sin consumir créditos de API mediante el sistema de Mock integrado.
-- **Ajustes Avanzados**: Configura tus propios prompts de sistema para afinar el análisis de estilo y la generación final.
 
 ## 🛠️ Tecnologías
 
