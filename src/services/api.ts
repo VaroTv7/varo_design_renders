@@ -8,6 +8,7 @@ export interface GenerationRequest {
     systemPrompts: SystemPrompts;
     isDebug: boolean;
     apiKey?: string;
+    apiUrl?: string;
 }
 
 export interface GenerationResponse {
@@ -41,13 +42,15 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             throw new Error("API Key is missing for production mode");
         }
 
+        const endpoint = request.apiUrl || 'https://api.nanobanana.com/v1/generate';
+
         // TODO: Replace with actual Nano Banana Pro API endpoint and payload structure
         // This is a placeholder for the actual implementation
         // const formData = new FormData();
         // formData.append('image', request.image);
         // ... append other fields
 
-        // const response = await fetch('https://api.nanobanana.com/v1/generate', {
+        // const response = await fetch(endpoint, {
         //   method: 'POST',
         //   headers: { 'Authorization': `Bearer ${request.apiKey}` },
         //   body: formData
@@ -56,7 +59,7 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
         // const data = await response.json();
         // return { imageUrl: data.url };
 
-        throw new Error("Real API integration not yet implemented");
+        throw new Error(`Real API integration to ${endpoint} not yet implemented`);
 
     } catch (error) {
         console.error('[API Error]', error);

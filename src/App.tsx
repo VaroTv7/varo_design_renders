@@ -7,7 +7,6 @@ import ResultViewer from './components/ResultViewer'
 import SettingsModal, { DEFAULT_PROMPTS } from './components/SettingsModal'
 import type { SystemPrompts } from './components/SettingsModal'
 import { useState } from 'react'
-import { Settings } from 'lucide-react'
 import { generateRender } from './services/api'
 
 function App() {
@@ -23,6 +22,7 @@ function App() {
 
     const [systemPrompts, setSystemPrompts] = useState<SystemPrompts>(DEFAULT_PROMPTS);
     const [apiKey, setApiKey] = useState('');
+    const [apiUrl, setApiUrl] = useState('https://api.nanobanana.com/v1/generate');
     const [isDebug, setIsDebug] = useState(true);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -53,7 +53,8 @@ function App() {
                 prompt,
                 systemPrompts,
                 isDebug,
-                apiKey
+                apiKey,
+                apiUrl
             });
 
             if (response.error) {
@@ -69,43 +70,22 @@ function App() {
         }
     };
 
-    const handleSaveSettings = (prompts: SystemPrompts, newApiKey: string, newIsDebug: boolean) => {
+    const handleSaveSettings = (prompts: SystemPrompts, newApiKey: string, newApiUrl: string, newIsDebug: boolean) => {
         setSystemPrompts(prompts);
         setApiKey(newApiKey);
+        setApiUrl(newApiUrl);
         setIsDebug(newIsDebug);
     };
 
     return (
-        <Layout className="flex-center">
-            <button
-                onClick={() => setIsSettingsOpen(true)}
-                style={{
-                    position: 'fixed',
-                    top: '20px',
-                    right: '80px', // Left of the menu button
-                    zIndex: 51,
-                    background: 'rgba(255,255,255,0.1)',
-                    border: 'none',
-                    color: 'white',
-                    padding: '8px',
-                    borderRadius: '50%',
-                    cursor: 'pointer',
-                    backdropFilter: 'blur(5px)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}
-                title="Ajustes de Prompts"
-            >
-                <Settings size={20} />
-            </button>
-
+        <Layout className="flex-center" onOpenSettings={() => setIsSettingsOpen(true)}>
             <SettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
                 prompts={systemPrompts}
                 onSave={handleSaveSettings}
                 initialApiKey={apiKey}
+                initialApiUrl={apiUrl}
                 initialIsDebug={isDebug}
             />
 

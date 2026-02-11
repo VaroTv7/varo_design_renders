@@ -1,7 +1,11 @@
 import React from 'react';
 import { Layers, Menu } from 'lucide-react';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+    onOpenSettings?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
     return (
         <header className="glass-panel" style={{
             position: 'fixed',
@@ -24,10 +28,13 @@ const Header: React.FC = () => {
 
             <nav className="flex-center" style={{ gap: 'var(--spacing-lg)' }}>
                 <button style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
-                    History
+                    Historial
                 </button>
-                <button style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
-                    Settings
+                <button
+                    onClick={onOpenSettings}
+                    style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', cursor: 'pointer', fontWeight: 500 }}
+                >
+                    Ajustes
                 </button>
                 <div style={{ width: '1px', height: '20px', background: 'var(--color-border)' }}></div>
                 <button className="flex-center" style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', cursor: 'pointer' }}>
