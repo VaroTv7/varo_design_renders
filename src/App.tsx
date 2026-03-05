@@ -35,7 +35,16 @@ function App() {
 
     const [systemPrompts, setSystemPrompts] = useState<SystemPrompts>(DEFAULT_PROMPTS);
     const [apiKey, setApiKey] = useState(() => localStorage.getItem('interiorismo_api_key') || '');
-    const [model, setModel] = useState(() => localStorage.getItem('interiorismo_model') || 'gemini-2.0-flash');
+    const [model, setModel] = useState(() => {
+        const saved = localStorage.getItem('interiorismo_model');
+        // Migración: Si el usuario tiene el modelo preview que falla con cuota 0, 
+        // lo pasamos automáticamente al estable de la versión 1.1.
+        if (saved === 'gemini-3.1-flash-image-preview' || !saved) {
+            localStorage.setItem('interiorismo_model', 'gemini-2.0-flash');
+            return 'gemini-2.0-flash';
+        }
+        return saved;
+    });
     const [isDebug, setIsDebug] = useState(() => localStorage.getItem('interiorismo_debug') === 'true'); // Default false (production)
 
     // Advanced Settings

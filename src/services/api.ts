@@ -112,7 +112,7 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             throw new Error("Falta la API Key. Ve a Ajustes → API y Modelo para configurarla.");
         }
 
-        const model = request.model || 'gemini-3.1-flash-image-preview';
+        const model = request.model || 'gemini-2.0-flash';
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
         // Build multimodal parts array
