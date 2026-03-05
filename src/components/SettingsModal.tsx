@@ -231,15 +231,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                         className="input-field"
                                                         value={model}
                                                         onChange={(e) => setModel(e.target.value)}
-                                                        style={{ width: '100%', background: 'rgba(0,0,0,0.3)' }}
+                                                        style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: model.includes('pro') ? '1px solid var(--color-accent)' : '1px solid var(--color-border)' }}
                                                     >
-                                                        <option value="gemini-2.0-flash">🚀 Gemini 2.0 Flash (Más Estable — Gratis)</option>
-                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (Preview — Requiere Billing)</option>
-                                                        <option value="gemini-2.5-flash-image">⚡ Nano Banana (Rápido — Gratis)</option>
-                                                        <option value="gemini-3-pro-image-preview">💎 Nano Banana Pro (Premium)</option>
+                                                        <option value="gemini-3-pro-image-preview">💎 Nano Banana Pro (Calidad Premium — Recomendado Pago)</option>
+                                                        <option value="gemini-2.0-flash">🚀 Gemini 2.0 Flash (Estable — 1500 renders/día gratis)</option>
+                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (High Efficiency — Requiere Billing)</option>
+                                                        <option value="gemini-2.5-flash-image">⚡ Nano Banana (Ultra Rápido — Gratis)</option>
                                                     </select>
-                                                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '6px', lineHeight: '1.4' }}>
-                                                        <strong>Nota:</strong> Si recibes error de "Quota limit: 0", selecciona <strong>Gemini 2.0 Flash</strong> o vincula una cuenta de facturación en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>AI Studio</a> para activar los modelos Preview.
+                                                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '8px', lineHeight: '1.4' }}>
+                                                        💡 <strong>Para usuarios Pro:</strong> Si pagas por la API, asegúrate de haber vinculado una "Cuenta de Facturación" en tu proyecto de <a href="https://console.cloud.google.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Google Cloud</a>.
+                                                        <br />
+                                                        <em>Nota: Pagar la suscripción "Gemini Advanced" de 20€/mes no da créditos para esta API; se factura aparte por imagen generada.</em>
                                                     </p>
                                                 </div>
 
