@@ -28,6 +28,7 @@ function App() {
     const [objectRefs, setObjectRefs] = useState<ImageReference[]>([]);
 
     const [prompt, setPrompt] = useState('');
+    const [showGuide, setShowGuide] = useState(true);
     const [isLoading, setIsLoading] = useState(false);
     const [result, setResult] = useState<string | null>(null);
 
@@ -159,12 +160,12 @@ function App() {
             />
 
             <div style={{ maxWidth: '800px', width: '100%', paddingBottom: '100px' }}>
-                <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '2rem' }}>
+                <div className="glass-panel" style={{ padding: '2rem', textAlign: 'center', marginBottom: '1.5rem' }}>
                     <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem', background: 'linear-gradient(to right, #64f3d5, #fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 800 }}>
-                        Interiorismo AI
+                        VaroIntAi Designs
                     </h1>
                     <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-md)' }}>
-                        Transforma tus capturas del viewport en renders profesionales con IA.
+                        Transforma capturas del viewport en renders fotorrealistas con IA.
                     </p>
                     {isDebug && (
                         <div style={{
@@ -179,6 +180,66 @@ function App() {
                             border: '1px solid rgba(255, 193, 7, 0.3)'
                         }}>
                             MODO DEBUG ACTIVO (MOCK)
+                        </div>
+                    )}
+                </div>
+
+                {/* Instructions Panel */}
+                <div className="glass-panel" style={{ marginBottom: '1.5rem', overflow: 'hidden' }}>
+                    <button
+                        onClick={() => setShowGuide(!showGuide)}
+                        style={{
+                            width: '100%',
+                            padding: '14px 20px',
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--color-text-primary)',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            fontSize: '0.95rem',
+                            fontWeight: 600
+                        }}
+                    >
+                        <span>📋 ¿Cómo funciona? — Guía rápida</span>
+                        <span style={{ transform: showGuide ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s', fontSize: '1.2rem' }}>▼</span>
+                    </button>
+                    {showGuide && (
+                        <div style={{ padding: '0 20px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <div style={{ height: '1px', background: 'var(--color-border)', marginBottom: '4px' }} />
+                            {[
+                                { step: '1', icon: '📸', title: 'Sube tu captura', desc: 'Sube una captura de pantalla de tu modelo 3D o del espacio que quieres transformar.' },
+                                { step: '2', icon: '🎨', title: 'Añade referencias de estilo', desc: 'Sube imágenes de referencia (Pinterest, revistas, etc.) para guiar la estética del render.' },
+                                { step: '3', icon: '🪑', title: 'Añade muebles/objetos', desc: 'Sube recortes de muebles u objetos específicos que quieres integrar en la escena.' },
+                                { step: '4', icon: '✏️', title: 'Usa el Editor (opcional)', desc: 'Dibuja zonas para indicar dónde colocar cada objeto y añade anotaciones a mano alzada.' },
+                                { step: '5', icon: '💬', title: 'Escribe tu prompt', desc: 'Describe el resultado deseado: materiales, iluminación, estilo, ambiente. Usa los tags rápidos.' },
+                                { step: '6', icon: '⚡', title: 'Generar Render', desc: 'Pulsa "Generar" y la IA creará un render fotorrealista basado en tus instrucciones.' },
+                            ].map((item) => (
+                                <div key={item.step} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                                    <div style={{
+                                        minWidth: '36px', height: '36px',
+                                        borderRadius: '50%',
+                                        background: 'rgba(100, 243, 213, 0.15)',
+                                        border: '1px solid rgba(100, 243, 213, 0.3)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '1rem'
+                                    }}>
+                                        {item.icon}
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>
+                                            {item.step}. {item.title}
+                                        </div>
+                                        <div style={{ fontSize: '0.82rem', color: 'var(--color-text-muted)', lineHeight: 1.4, marginTop: '2px' }}>
+                                            {item.desc}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                            <div style={{ marginTop: '8px', padding: '10px 14px', borderRadius: '8px', background: 'rgba(100, 243, 213, 0.08)', border: '1px solid rgba(100, 243, 213, 0.2)', fontSize: '0.82rem', color: 'var(--color-text-secondary)' }}>
+                                💡 <strong>Consejo:</strong> Configura tu API Key gratuita en <span style={{ color: 'var(--color-accent)', cursor: 'pointer' }} onClick={() => setIsSettingsOpen(true)}>Ajustes</span> → <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Google AI Studio</a> (500 renders/día gratis).
+                            </div>
                         </div>
                     )}
                 </div>
