@@ -33,7 +33,7 @@ function App() {
 
     const [systemPrompts, setSystemPrompts] = useState<SystemPrompts>(DEFAULT_PROMPTS);
     const [apiKey, setApiKey] = useState(() => localStorage.getItem('interiorismo_api_key') || '');
-    const [apiUrl, setApiUrl] = useState(() => localStorage.getItem('interiorismo_api_url') || 'https://api.nanobanana.com/v1/generate');
+    const [model, setModel] = useState(() => localStorage.getItem('interiorismo_model') || 'gemini-3.1-flash-image-preview');
     const [isDebug, setIsDebug] = useState(() => localStorage.getItem('interiorismo_debug') !== 'false'); // Default true
 
     // Advanced Settings
@@ -81,7 +81,7 @@ function App() {
                 systemPrompts,
                 isDebug,
                 apiKey,
-                apiUrl,
+                model,
                 upscale: parseInt(upscale),
                 format: format as 'png' | 'webp' | 'jpg',
                 history,
@@ -104,7 +104,7 @@ function App() {
     const handleSaveSettings = (
         prompts: SystemPrompts,
         newApiKey: string,
-        newApiUrl: string,
+        newModel: string,
         newIsDebug: boolean,
         newUpscale: string,
         newFormat: string,
@@ -115,8 +115,8 @@ function App() {
         setApiKey(newApiKey);
         localStorage.setItem('interiorismo_api_key', newApiKey);
 
-        setApiUrl(newApiUrl);
-        localStorage.setItem('interiorismo_api_url', newApiUrl);
+        setModel(newModel);
+        localStorage.setItem('interiorismo_model', newModel);
 
         setIsDebug(newIsDebug);
         localStorage.setItem('interiorismo_debug', String(newIsDebug));
@@ -145,7 +145,7 @@ function App() {
                 prompts={systemPrompts}
                 onSave={handleSaveSettings}
                 initialApiKey={apiKey}
-                initialApiUrl={apiUrl}
+                initialModel={model}
                 initialIsDebug={isDebug}
                 initialUpscale={upscale}
                 initialFormat={format}

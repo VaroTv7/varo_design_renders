@@ -24,9 +24,9 @@ interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;
     prompts: SystemPrompts;
-    onSave: (prompts: SystemPrompts, apiKey: string, apiUrl: string, isDebug: boolean, upscale: string, format: string, history: boolean) => void;
+    onSave: (prompts: SystemPrompts, apiKey: string, model: string, isDebug: boolean, upscale: string, format: string, history: boolean) => void;
     initialApiKey: string;
-    initialApiUrl: string;
+    initialModel: string;
     initialIsDebug: boolean;
     initialUpscale: string;
     initialFormat: string;
@@ -41,7 +41,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     prompts,
     onSave,
     initialApiKey,
-    initialApiUrl,
+    initialModel,
     initialIsDebug,
     initialUpscale,
     initialFormat,
@@ -50,7 +50,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [activeTab, setActiveTab] = useState<Tab>('api');
     const [localPrompts, setLocalPrompts] = useState<SystemPrompts>(prompts);
     const [apiKey, setApiKey] = useState(initialApiKey);
-    const [apiUrl, setApiUrl] = useState(initialApiUrl);
+    const [model, setModel] = useState(initialModel);
     const [isDebug, setIsDebug] = useState(initialIsDebug);
 
     // Advanced Settings State
@@ -66,7 +66,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         if (isOpen) {
             setLocalPrompts(prompts);
             setApiKey(initialApiKey);
-            setApiUrl(initialApiUrl);
+            setModel(initialModel);
             setIsDebug(initialIsDebug);
             setUpscale(initialUpscale);
             setFormat(initialFormat);
@@ -83,10 +83,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                 }
             }
         }
-    }, [isOpen, prompts, initialApiKey, initialApiUrl, initialIsDebug, initialUpscale, initialFormat, initialHistory]);
+    }, [isOpen, prompts, initialApiKey, initialModel, initialIsDebug, initialUpscale, initialFormat, initialHistory]);
 
     const handleSave = () => {
-        onSave(localPrompts, apiKey, apiUrl, isDebug, upscale, format, history);
+        onSave(localPrompts, apiKey, model, isDebug, upscale, format, history);
         onClose();
     };
 
@@ -225,32 +225,34 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                                 <div>
                                                     <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                                                        Endpoint de la API
+                                                        Modelo de IA
                                                     </label>
-                                                    <input
-                                                        type="text"
+                                                    <select
                                                         className="input-field"
-                                                        value={apiUrl}
-                                                        onChange={(e) => setApiUrl(e.target.value)}
-                                                        placeholder="https://api.nanobanana.com/v1/generate"
-                                                        style={{ background: 'rgba(0,0,0,0.3)', fontFamily: 'monospace' }}
-                                                    />
+                                                        value={model}
+                                                        onChange={(e) => setModel(e.target.value)}
+                                                        style={{ width: '100%', background: 'rgba(0,0,0,0.3)' }}
+                                                    >
+                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (Recomendado — Gratis)</option>
+                                                        <option value="gemini-2.5-flash-image">⚡ Nano Banana (Rápido — Gratis)</option>
+                                                        <option value="gemini-3-pro-image-preview">💎 Nano Banana Pro (Premium)</option>
+                                                    </select>
                                                     <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '6px' }}>
-                                                        URL completa del endpoint para generación de imágenes.
+                                                        500 imágenes/día gratis con Nano Banana 2. Obtén tu clave en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Google AI Studio</a>.
                                                     </p>
                                                 </div>
 
                                                 <div>
                                                     <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                                                        API Key (Nano Banana Pro)
+                                                        API Key (Google AI Studio)
                                                     </label>
                                                     <input
                                                         type="password"
                                                         className="input-field"
                                                         value={apiKey}
                                                         onChange={(e) => setApiKey(e.target.value)}
-                                                        placeholder="sk-..."
-                                                        style={{ background: 'rgba(0,0,0,0.3)' }}
+                                                        placeholder="AIza..."
+                                                        style={{ background: 'rgba(0,0,0,0.3)', fontFamily: 'monospace' }}
                                                     />
                                                 </div>
                                             </motion.div>
