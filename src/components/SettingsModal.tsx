@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, RotateCcw, Server, MessageSquare, Sliders, Info, Plus, Trash2, CheckCircle2, AlertCircle, ExternalLink, RefreshCw, Key, Database, Code, FlaskConical, Layout as LayoutIcon, Settings as SettingsIconLucide } from 'lucide-react';
+import { X, Save, RotateCcw, Server, MessageSquare, Sliders, Info, Plus, Trash2, RefreshCw } from 'lucide-react';
 import { testConnection } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../styles/modal.css';
