@@ -6,12 +6,13 @@ interface LayoutProps {
     children: ReactNode;
     className?: string; // Allow passing standard className
     onOpenSettings?: () => void;
+    extraActions?: ReactNode;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, className = '', onOpenSettings }) => {
+const Layout: React.FC<LayoutProps> = ({ children, className = '', onOpenSettings, extraActions }) => {
     return (
         <>
-            <Header onOpenSettings={onOpenSettings} />
+            <Header onOpenSettings={onOpenSettings} extraActions={extraActions} />
             <main className={`container ${className}`} style={{
                 paddingTop: 'calc(var(--spacing-2xl) * 2 + 20px)', /* Account for fixed header */
                 paddingBottom: 'var(--spacing-2xl)',

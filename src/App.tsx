@@ -9,7 +9,9 @@ import type { SystemPrompts } from './components/SettingsModal'
 import CanvasEditor, { type Zone } from './components/CanvasEditor'
 import { useState, useEffect } from 'react'
 import { generateRender } from './services/api'
-import { Edit2, Check } from 'lucide-react'
+import { Edit2, Check, Clock } from 'lucide-react'
+import { getHistory, saveToHistory, deleteFromHistory, clearHistory, type RenderHistoryItem } from './services/history'
+import HistoryList from './components/HistoryList'
 
 function App() {
     const [image, setImage] = useState<File | null>(null);
@@ -58,6 +60,40 @@ function App() {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [maskBlob, setMaskBlob] = useState<Blob | null>(null);
     const [editorZones, setEditorZones] = useState<Zone[]>([]);
+
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [historyData, setHistoryData] = useState<RenderHistoryItem[]>([]);
+
+    // History Logic
+    const loadHistory = async () => {
+        try {
+            const data = await getHistory();
+            setHistoryData(data);
+        } catch (err) {
+            console.error('Error cargando historial:', err);
+        }
+    };
+
+    useEffect(() => {
+        loadHistory();
+    }, []);
+
+    const handleDeleteHistory = async (id: string) => {
+        await deleteFromHistory(id);
+        loadHistory();
+    };
+
+    const handleClearHistory = async () => {
+        await clearHistory();
+        loadHistory();
+    };
+
+    const handleSelectHistory = (item: RenderHistoryItem) => {
+        setResult(item.generatedImage);
+        setIsHistoryOpen(false);
+        setPrompt(item.prompt);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     // Persistent Prompt
     useEffect(() => {
@@ -142,7 +178,22 @@ function App() {
                 alert(res.error);
             } else {
                 setResult(res.imageUrl);
-                // Optionally scroll to result
+
+                // Save to History
+                try {
+                    await saveToHistory({
+                        id: Date.now().toString(),
+                        timestamp: Date.now(),
+                        originalImage: previewUrl || '',
+                        generatedImage: res.imageUrl,
+                        prompt: prompt,
+                        model: model
+                    });
+                    loadHistory();
+                } catch (historyErr) {
+                    console.error('Error guardando en historial:', historyErr);
+                }
+
                 window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
         } catch (err) {
@@ -189,7 +240,30 @@ function App() {
     };
 
     return (
-        <Layout className="flex-center" onOpenSettings={() => setIsSettingsOpen(true)}>
+        <Layout
+            className="flex-center"
+            onOpenSettings={() => setIsSettingsOpen(true)}
+            extraActions={
+                <button
+                    onClick={() => setIsHistoryOpen(!isHistoryOpen)}
+                    style={{
+                        background: isHistoryOpen ? 'rgba(100, 243, 213, 0.2)' : 'rgba(255,255,255,0.05)',
+                        border: isHistoryOpen ? '1px solid var(--color-accent)' : '1px solid var(--color-border)',
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        cursor: 'pointer',
+                        color: isHistoryOpen ? 'var(--color-accent)' : 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        fontSize: '0.9rem',
+                        transition: 'all 0.2s'
+                    }}
+                >
+                    <Clock size={16} /> Historial
+                </button>
+            }
+        >
             <SettingsModal
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
@@ -369,13 +443,54 @@ function App() {
 
                     {result && (
                         <ResultViewer
-                            originalImage={previewUrl}
                             generatedImage={result}
                             userPrompt={prompt}
                         />
                     )}
                 </div>
             </div>
+
+            {/* History Drawer / Modal */}
+            {isHistoryOpen && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    width: 'min(450px, 90vw)',
+                    background: 'var(--color-bg)',
+                    borderLeft: '1px solid var(--color-border)',
+                    boxShadow: '-10px 0 30px rgba(0,0,0,0.5)',
+                    zIndex: 1000,
+                    overflowY: 'auto',
+                    padding: '24px',
+                    animation: 'slideInRight 0.3s ease-out'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <h2 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Mi Historial</h2>
+                        <button
+                            onClick={() => setIsHistoryOpen(false)}
+                            style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer', fontSize: '1.5rem' }}
+                        >
+                            &times;
+                        </button>
+                    </div>
+
+                    <HistoryList
+                        history={historyData}
+                        onSelect={handleSelectHistory}
+                        onDelete={handleDeleteHistory}
+                        onClear={handleClearHistory}
+                    />
+                </div>
+            )}
+
+            {isHistoryOpen && (
+                <div
+                    onClick={() => setIsHistoryOpen(false)}
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', zIndex: 999 }}
+                />
+            )}
 
             <CanvasEditor
                 isOpen={isEditorOpen}
@@ -385,7 +500,7 @@ function App() {
                 initialZones={editorZones}
             />
 
-        </Layout >
+        </Layout>
     )
 }
 

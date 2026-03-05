@@ -1,11 +1,12 @@
-import React from 'react';
 import { Layers, Menu } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 interface HeaderProps {
     onOpenSettings?: () => void;
+    extraActions?: ReactNode;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
+const Header: React.FC<HeaderProps> = ({ onOpenSettings, extraActions }) => {
     return (
         <header className="glass-panel" style={{
             position: 'fixed',
@@ -27,12 +28,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
             </div>
 
             <nav className="flex-center" style={{ gap: 'var(--spacing-lg)' }}>
-                <button style={{
-                    background: 'none', border: 'none', color: 'var(--color-text-secondary)',
-                    cursor: 'pointer', transition: 'all 0.2s', fontSize: '14px'
-                }} className="hover-highlight">
-                    Historial
-                </button>
+                {extraActions}
                 <button
                     onClick={onOpenSettings}
                     style={{

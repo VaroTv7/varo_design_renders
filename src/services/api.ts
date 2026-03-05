@@ -171,7 +171,16 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
         }
 
         parts.push({
-            text: "Genera una imagen fotorrealista de alta calidad. Devuelve SOLO la imagen generada."
+            text: `
+                IMPORTANTE: Genera una imagen que mantenga EXACTAMENTE la misma resolución y relación de aspecto que la PRIMERA imagen proporcionada (la captura del espacio).
+                
+                Actúa como un experto Diseñador de Interiores y Arquitecto. 
+                Transforma este espacio siguiendo estas instrucciones:
+                ${request.prompt}
+                
+                ${request.upscale === 2 ? 'Aumenta el detalle y la nitidez para un resultado de alta resolución.' : ''}
+                Garantiza que el estilo sea coherente y fotorrealista. Devuelve SOLO la imagen generada.
+            `
         });
 
         const payload = {
