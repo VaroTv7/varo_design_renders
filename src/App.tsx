@@ -282,7 +282,7 @@ function App() {
                                 </div>
                             ))}
                             <div style={{ marginTop: '8px', padding: '10px 14px', borderRadius: '8px', background: 'rgba(100, 243, 213, 0.08)', border: '1px solid rgba(100, 243, 213, 0.2)', fontSize: '0.82rem', color: 'var(--color-text-secondary)' }}>
-                                💡 <strong>Consejo:</strong> Configura tu API Key gratuita en <span style={{ color: 'var(--color-accent)', cursor: 'pointer' }} onClick={() => setIsSettingsOpen(true)}>Ajustes</span> → <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Google AI Studio</a> (500 renders/día gratis).
+                                💡 <strong>Consejo:</strong> Usa <strong>Gemini 2.0 Flash</strong> con tu API Key gratuita de <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Google AI Studio</a> (500 renders/día gratis). Los modelos Nano Banana requieren facturación.
                             </div>
                         </div>
                     )}

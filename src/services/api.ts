@@ -198,7 +198,7 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             let errorMsg = (errorData as any)?.error?.message || `HTTP ${response.status}`;
 
             if (errorMsg.includes("limit: 0")) {
-                errorMsg = `⚠️ Error de Cuota (Límite 0): Google ha bloqueado este modelo para tu proyecto.\n\nESTO SUELE PASAR SI:\n1. Tienes "Gemini Advanced" pero NO has configurado "Facturación" en Google Cloud.\n2. Tu clave de API es de un proyecto gratuito que Google ha limitado temporalmente.\n\nSOLUCIÓN: Ve a console.cloud.google.com/billing y vincula tu tarjeta.`;
+                errorMsg = `⚠️ MODELO BLOQUEADO (Límite 0): El modelo "${model}" no tiene cuota asignada en tu cuenta gratuita.\n\nSOLUCIÓN:\n1. Selecciona "Gemini 2.0 Flash" en Ajustes (Suele tener cuota gratuita).\n2. O vincula una tarjeta en console.cloud.google.com/billing para activar modelos Pro/Nano.`;
             }
             return { imageUrl: '', error: errorMsg };
         }
@@ -247,7 +247,7 @@ export const testConnection = async (apiKey: string, model: string): Promise<{ s
             const data = await response.json().catch(() => ({}));
             const msg = data?.error?.message || `Error ${response.status}`;
             if (msg.includes("limit: 0")) {
-                return { success: false, message: "❌ ERROR DE CUOTA (Límite 0): Revisa tu facturación en Google Cloud." };
+                return { success: false, message: `❌ ERROR DE CUOTA (Límite 0): "${model}" requiere Facturación activada.\n\nPrueba con "Gemini 2.0 Flash" si usas AI Studio gratis.` };
             }
             return { success: false, message: `❌ Error: ${msg}` };
         }

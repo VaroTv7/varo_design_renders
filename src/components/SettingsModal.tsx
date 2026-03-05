@@ -248,10 +248,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                         onChange={(e) => setModel(e.target.value)}
                                                         style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: model.includes('pro') ? '1px solid var(--color-accent)' : '1px solid var(--color-border)' }}
                                                     >
-                                                        <option value="gemini-3-pro-image-preview">💎 Nano Banana Pro (Gemini 3 Pro Image — Recomendado Pago/Pro)</option>
-                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (Gemini 3.1 Flash Image — Alta Eficiencia)</option>
-                                                        <option value="gemini-2.5-flash-image">⚡ Nano Banana (Gemini 2.5 Flash Image — Rápido/Gratis)</option>
-                                                        <option value="gemini-2.0-flash">🚀 Gemini 2.0 Flash (Multimodal Estable — Backup)</option>
+                                                        <option value="gemini-2.0-flash">🚀 Gemini 2.0 Flash (GRATIS / Recomendado Studio)</option>
+                                                        <option value="gemini-2.5-flash-image">⚡ Nano Banana (Flash Image — Rápido/Gratis?)</option>
+                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (Requiere Billing/Facturación)</option>
+                                                        <option value="gemini-3-pro-image-preview">💎 Nano Banana Pro (Requiere Billing/Facturación)</option>
                                                     </select>
 
                                                     <button
@@ -304,9 +304,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                             <Info size={14} color="var(--color-accent)" /> Ayuda para Usuarios Pro
                                                         </h4>
                                                         <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: '1.4', margin: 0 }}>
-                                                            ⚠️ Si tienes la suscripción <strong>Gemini Advanced</strong> de 20€/mes, esta NO te da créditos para la API.
+                                                            ⚠️ Si usas <strong>Google AI Studio gratuito</strong> y te da "Cuota 0", selecciona <strong>Gemini 2.0 Flash</strong>.
                                                             <br /><br />
-                                                            Para usar los modelos Pro aquí, necesitas asociar una "Tarjeta de Facturación" directamente en la <a href="https://console.cloud.google.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Consola de Google Cloud</a> de tu proyecto.
+                                                            Los modelos <strong>Nano Banana 2/Pro</strong> solo funcionan si vinculas una tarjeta en <a href="https://console.cloud.google.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Google Cloud</a>.
+                                                            (Suscripción Gemini Advanced ≠ Créditos API).
                                                         </p>
                                                     </div>
                                                 </div>
