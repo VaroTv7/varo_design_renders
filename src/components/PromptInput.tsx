@@ -6,9 +6,10 @@ interface PromptInputProps {
     setPrompt: React.Dispatch<React.SetStateAction<string>>;
     onGenerate: () => void;
     isLoading: boolean;
+    loadingMessage?: string;
 }
 
-const PromptInput: React.FC<PromptInputProps> = ({ prompt, setPrompt, onGenerate, isLoading }) => {
+const PromptInput: React.FC<PromptInputProps> = ({ prompt, setPrompt, onGenerate, isLoading, loadingMessage = 'Generando...' }) => {
     return (
         <div className="glass-panel" style={{ padding: 'var(--spacing-md)', marginTop: 'var(--spacing-lg)' }}>
             <div style={{ position: 'relative' }}>
@@ -25,27 +26,33 @@ const PromptInput: React.FC<PromptInputProps> = ({ prompt, setPrompt, onGenerate
                     }}
                 />
                 <button
-                    className="btn-primary"
+                    className={`btn-primary ${isLoading ? 'pulse-glow' : ''}`}
                     onClick={onGenerate}
                     disabled={isLoading || !prompt.trim()}
                     style={{
                         position: 'absolute',
                         bottom: '12px',
                         right: '12px',
-                        padding: '8px 16px',
+                        padding: '10px 20px',
                         fontSize: 'var(--font-size-sm)',
-                        opacity: isLoading || !prompt.trim() ? 0.5 : 1,
-                        cursor: isLoading || !prompt.trim() ? 'not-allowed' : 'pointer',
+                        opacity: isLoading || !prompt.trim() ? 0.6 : 1,
+                        cursor: isLoading || !prompt.trim() ? 'wait' : 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '8px',
+                        boxShadow: isLoading ? '0 0 15px var(--color-accent)' : 'none',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                     }}
                 >
                     {isLoading ? (
-                        'Generando...'
+                        <>
+                            <div className="pulse-loader" style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'currentColor' }} />
+                            {loadingMessage}
+                        </>
                     ) : (
                         <>
-                            Generar <Zap size={16} fill="currentColor" />
+                            {prompt.trim() ? 'Generar Render' : 'Escribe un prompt'}
+                            <Zap size={16} fill="currentColor" />
                         </>
                     )}
                 </button>

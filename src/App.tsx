@@ -27,14 +27,15 @@ function App() {
     const [styleRefs, setStyleRefs] = useState<ImageReference[]>([]);
     const [objectRefs, setObjectRefs] = useState<ImageReference[]>([]);
 
-    const [prompt, setPrompt] = useState('');
+    const [prompt, setPrompt] = useState(() => sessionStorage.getItem('interiorismo_current_prompt') || '');
     const [showGuide, setShowGuide] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
+    const [loadingStatus, setLoadingStatus] = useState<string | null>(null);
+    const isLoading = !!loadingStatus;
     const [result, setResult] = useState<string | null>(null);
 
     const [systemPrompts, setSystemPrompts] = useState<SystemPrompts>(DEFAULT_PROMPTS);
     const [apiKey, setApiKey] = useState(() => localStorage.getItem('interiorismo_api_key') || '');
-    const [model, setModel] = useState(() => localStorage.getItem('interiorismo_model') || 'gemini-3.1-flash-image-preview');
+    const [model, setModel] = useState(() => localStorage.getItem('interiorismo_model') || 'gemini-2.0-flash');
     const [isDebug, setIsDebug] = useState(() => localStorage.getItem('interiorismo_debug') === 'true'); // Default false (production)
 
     // Advanced Settings
@@ -48,6 +49,40 @@ function App() {
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [maskBlob, setMaskBlob] = useState<Blob | null>(null);
     const [editorZones, setEditorZones] = useState<Zone[]>([]);
+
+    // Persistent Prompt
+    useEffect(() => {
+        sessionStorage.setItem('interiorismo_current_prompt', prompt);
+    }, [prompt]);
+
+    // Global Drag & Drop Support
+    useEffect(() => {
+        const handleGlobalDrop = (e: DragEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const files = e.dataTransfer?.files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('image/')) {
+                    handleImageSelect(file);
+                }
+            }
+        };
+
+        const handleDragOver = (e: DragEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        window.addEventListener('drop', handleGlobalDrop);
+        window.addEventListener('dragover', handleDragOver);
+
+        return () => {
+            window.removeEventListener('drop', handleGlobalDrop);
+            window.removeEventListener('dragover', handleDragOver);
+        };
+    }, []);
 
     const handleImageSelect = (file: File) => {
         setImage(file);
@@ -76,11 +111,9 @@ function App() {
             return;
         }
 
-        setIsLoading(true);
-        setResult(null);
-
+        setLoadingStatus("Preparando imágenes...");
         try {
-            const response = await generateRender({
+            const res = await generateRender({
                 image,
                 styleRefs,
                 objectRefs,
@@ -90,21 +123,23 @@ function App() {
                 apiKey,
                 model,
                 upscale: parseInt(upscale),
-                format: format as 'png' | 'webp' | 'jpg',
+                format: format as any,
                 history,
-                mask: maskBlob // Pass the mask blob
+                mask: maskBlob,
+                onProgress: (status) => setLoadingStatus(status)
             });
 
-            if (response.error) {
-                alert(`Error: ${response.error}`);
+            if (res.error) {
+                alert(res.error);
             } else {
-                setResult(response.imageUrl);
+                setResult(res.imageUrl);
+                // Optionally scroll to result
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
-        } catch (error) {
-            console.error(error);
-            alert('Ocurrió un error inesperado al generar el render.');
+        } catch (err) {
+            alert(err instanceof Error ? err.message : 'Error en la generación');
         } finally {
-            setIsLoading(false);
+            setLoadingStatus(null);
         }
     };
 
@@ -297,12 +332,30 @@ function App() {
                     )}
 
                     {previewUrl && (
-                        <PromptInput
-                            prompt={prompt}
-                            setPrompt={setPrompt}
-                            onGenerate={handleGenerate}
-                            isLoading={isLoading}
-                        />
+                        <div style={{ position: 'relative' }}>
+                            <PromptInput
+                                prompt={prompt}
+                                setPrompt={setPrompt}
+                                onGenerate={handleGenerate}
+                                isLoading={isLoading}
+                            />
+                            {loadingStatus && (
+                                <div style={{
+                                    marginTop: '8px',
+                                    textAlign: 'center',
+                                    fontSize: '0.85rem',
+                                    color: 'var(--color-accent)',
+                                    fontWeight: 500,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '8px'
+                                }}>
+                                    <div className="pulse-loader" style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-accent)' }} />
+                                    {loadingStatus}
+                                </div>
+                            )}
+                        </div>
                     )}
 
                     {result && (

@@ -104,10 +104,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                             flexDirection: 'column',
                             padding: 'var(--spacing-2xl)',
                             border: `2px dashed ${isDragging ? 'var(--color-accent)' : 'var(--color-border)'}`,
-                            background: isDragging ? 'rgba(100, 243, 213, 0.05)' : 'rgba(255, 255, 255, 0.02)',
+                            background: isDragging ? 'rgba(100, 243, 213, 0.08)' : 'rgba(255, 255, 255, 0.01)',
                             cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            minHeight: '200px'
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                            minHeight: '220px',
+                            boxShadow: isDragging ? '0 0 20px rgba(100, 243, 213, 0.1)' : 'none'
                         }}
                         onClick={() => fileInputRef.current?.click()}
                         onDragOver={handleDragOver}
@@ -115,19 +116,20 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                         onDrop={handleDrop}
                     >
                         <div style={{
-                            background: 'rgba(255, 255, 255, 0.05)',
-                            padding: '16px',
+                            background: isDragging ? 'rgba(100, 243, 213, 0.1)' : 'rgba(255, 255, 255, 0.03)',
+                            padding: '20px',
                             borderRadius: '50%',
-                            marginBottom: 'var(--spacing-md)'
+                            marginBottom: 'var(--spacing-md)',
+                            transition: 'all 0.3s'
                         }}>
-                            <Upload size={32} color={isDragging ? 'var(--color-accent)' : 'var(--color-text-muted)'} />
+                            <Upload size={40} color={isDragging ? 'var(--color-accent)' : 'var(--color-text-muted)'} />
                         </div>
 
-                        <p style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-xs)', fontWeight: 500 }}>
-                            Click or drag image here
+                        <p style={{ color: 'var(--color-text-primary)', marginBottom: 'var(--spacing-xs)', fontWeight: 600, fontSize: '1.1rem' }}>
+                            {isDragging ? '¡Suéltala aquí!' : 'Haz clic o arrastra una imagen'}
                         </p>
-                        <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-                            Supports JPG, PNG (Max 10MB)
+                        <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem' }}>
+                            Soporta JPG, PNG, WebP (Máx 10MB)
                         </p>
 
                         <input

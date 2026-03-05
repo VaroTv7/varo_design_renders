@@ -13,6 +13,7 @@ export interface GenerationRequest {
     format?: 'png' | 'webp' | 'jpg';
     history?: boolean;
     mask?: Blob | null;
+    onProgress?: (status: string) => void;
 }
 
 export interface GenerationResponse {
@@ -22,20 +23,38 @@ export interface GenerationResponse {
 
 // --- Helpers ---
 
-const fileToBase64 = (file: File): Promise<string> => {
+const compressImage = (file: File | Blob, maxWidth = 1920, maxHeight = 1920): Promise<Blob> => {
     return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            const result = reader.result as string;
-            // Remove data:...;base64, prefix
-            resolve(result.split(',')[1]);
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(img.src);
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width *= ratio;
+                height *= ratio;
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob((blob) => {
+                if (blob) resolve(blob);
+                else reject(new Error("Error al comprimir imagen"));
+            }, 'image/webp', 0.85);
         };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+        img.onerror = reject;
     });
 };
 
-const blobToBase64 = (blob: Blob): Promise<string> => {
+const fileToBase64 = async (file: File, compress = true): Promise<string> => {
+    const target = compress ? await compressImage(file) : file;
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -43,7 +62,20 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
             resolve(result.split(',')[1]);
         };
         reader.onerror = reject;
-        reader.readAsDataURL(blob);
+        reader.readAsDataURL(target);
+    });
+};
+
+const blobToBase64 = async (blob: Blob, compress = true): Promise<string> => {
+    const target = compress ? await compressImage(blob) : blob;
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+            const result = reader.result as string;
+            resolve(result.split(',')[1]);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(target);
     });
 };
 
@@ -168,6 +200,7 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             }
         };
 
+        request.onProgress?.("Analizando y enviando...");
         console.log('[Gemini API] Sending request to:', endpoint);
         console.log('[Gemini API] Parts count:', parts.length);
 
@@ -177,6 +210,8 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+
+        request.onProgress?.("Procesando render...");
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));

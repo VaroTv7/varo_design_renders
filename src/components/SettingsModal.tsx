@@ -233,12 +233,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                         onChange={(e) => setModel(e.target.value)}
                                                         style={{ width: '100%', background: 'rgba(0,0,0,0.3)' }}
                                                     >
-                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (Recomendado — Gratis)</option>
+                                                        <option value="gemini-2.0-flash">🚀 Gemini 2.0 Flash (Más Estable — Gratis)</option>
+                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (Preview — Requiere Billing)</option>
                                                         <option value="gemini-2.5-flash-image">⚡ Nano Banana (Rápido — Gratis)</option>
                                                         <option value="gemini-3-pro-image-preview">💎 Nano Banana Pro (Premium)</option>
                                                     </select>
-                                                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '6px' }}>
-                                                        500 imágenes/día gratis con Nano Banana 2. Obtén tu clave en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Google AI Studio</a>.
+                                                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '6px', lineHeight: '1.4' }}>
+                                                        <strong>Nota:</strong> Si recibes error de "Quota limit: 0", selecciona <strong>Gemini 2.0 Flash</strong> o vincula una cuenta de facturación en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>AI Studio</a> para activar los modelos Preview.
                                                     </p>
                                                 </div>
 

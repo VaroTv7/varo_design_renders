@@ -48,3 +48,44 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+/* Animations */
+@keyframes pulse-loader {
+
+    0%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 5px rgba(100, 243, 213, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(100, 243, 213, 0.6);
+    }
+}
+
+.pulse-loader {
+    animation: pulse-loader 1.5s infinite ease-in-out;
+}
+
+.pulse-glow {
+    animation: pulse-glow 2s infinite ease-in-out;
+}
+
+/* Accessibility */
+:focus-visible {
+    outline: 2px solid var(--color-accent) !important;
+    outline-offset: 4px !important;
+}
