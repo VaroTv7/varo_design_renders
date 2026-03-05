@@ -14,7 +14,7 @@ const PromptInput: React.FC<PromptInputProps> = ({ prompt, setPrompt, onGenerate
             <div style={{ position: 'relative' }}>
                 <textarea
                     className="input-field"
-                    placeholder="Describe tu visión (ej: 'Salón minimalista moderno con acentos de madera, iluminación cálida, render 4k')"
+                    placeholder="Describe el render que necesitas (ej: 'Salón minimalista con sofá gris, mesa de nogal, iluminación cálida natural, acabado fotorrealista 4K')"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     style={{
@@ -42,20 +42,20 @@ const PromptInput: React.FC<PromptInputProps> = ({ prompt, setPrompt, onGenerate
                     }}
                 >
                     {isLoading ? (
-                        'Generating...'
+                        'Generando...'
                     ) : (
                         <>
-                            Generate <Zap size={16} fill="currentColor" />
+                            Generar <Zap size={16} fill="currentColor" />
                         </>
                     )}
                 </button>
             </div>
 
             <div className="flex-center" style={{ justifyContent: 'flex-start', gap: '8px', marginTop: '12px' }}>
-                {['Modern', 'Industrial', 'Scandinavian', 'Luxury'].map((style) => (
+                {['Moderno', 'Industrial', 'Nórdico', 'Lujo', 'Rústico', 'Japandi'].map((style) => (
                     <button
                         key={style}
-                        onClick={() => setPrompt((prev) => `${prev} ${style} style, `)}
+                        onClick={() => setPrompt((prev) => `${prev} estilo ${style.toLowerCase()}, `)}
                         style={{
                             background: 'rgba(255,255,255,0.05)',
                             border: '1px solid var(--color-border)',

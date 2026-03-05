@@ -9,28 +9,28 @@
     backdrop-filter: blur(5px);
 }
 
-/* Base Modal Panel */
+/* Base Modal Panel — all layout is forced with !important to prevent conflicts */
 .settings-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 700px;
-    max-height: 90vh;
-    height: 85vh;
-    z-index: 101;
-    display: flex;
-    flex-direction: column;
-    background: #1a1a2e;
-    overflow: hidden;
-    padding: 0;
+    position: fixed !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 90% !important;
+    max-width: 700px !important;
+    max-height: 80vh !important;
+    height: auto !important;
+    z-index: 101 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #1a1a2e !important;
+    overflow: hidden !important;
+    padding: 0 !important;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
 }
 
-/* Mobile & High Zoom (Viewport width < 768px OR Height < 600px) */
+/* Mobile & High Zoom */
 @media (max-width: 768px),
 (max-height: 600px) {
     .settings-modal {
@@ -46,9 +46,9 @@
     }
 }
 
-/* TV / Large Screens (Optional polish) */
+/* TV / Large Screens */
 @media (min-width: 1920px) {
     .settings-modal {
-        max-width: 900px;
+        max-width: 900px !important;
     }
 }

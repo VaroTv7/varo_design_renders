@@ -10,9 +10,9 @@ export interface SystemPrompts {
 }
 
 export const DEFAULT_PROMPTS: SystemPrompts = {
-    styleCheck: "Analiza las imágenes de referencia y extrae el estilo clave, paleta de colores e iluminación.",
-    objectIntegration: "Identifica los objetos en las imágenes subidas y determina la mejor ubicación y escala en la escena.",
-    finalRender: "Genera un render fotorrealista de alta calidad aplicando el estilo extraído y los objetos a la captura del viewport."
+    styleCheck: "Eres un experto en diseño de interiores y renderizado arquitectónico. Analiza la imagen base del viewport y las referencias de estilo proporcionadas. Extrae la paleta de colores, materiales, iluminación y atmósfera general para aplicarlos al render final.",
+    objectIntegration: "Identifica los objetos y muebles en las imágenes de referencia. Intégralos de forma natural en la escena respetando la perspectiva, la escala, las sombras y la iluminación del entorno. Los objetos deben parecer parte orgánica del espacio.",
+    finalRender: "Genera un render fotorrealista de alta calidad profesional. El resultado debe parecer una fotografía de revista de arquitectura: iluminación natural suave, materiales realistas, reflejos sutiles y profundidad de campo. Mantén la composición y perspectiva de la imagen original."
 };
 
 interface Preset {
@@ -170,10 +170,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="glass-panel settings-modal"
+                        className="settings-modal"
                     >
                         {/* Header */}
-                        <div className="flex-between" style={{ padding: 'var(--spacing-lg)', borderBottom: '1px solid var(--color-border)' }}>
+                        <div className="flex-between" style={{ padding: 'var(--spacing-lg)', borderBottom: '1px solid var(--color-border)', flexShrink: 0 }}>
                             <h2 style={{ fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <SettingsIcon /> Ajustes de Configuración
                             </h2>
@@ -183,14 +183,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         </div>
 
                         {/* Tabs */}
-                        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.2)' }}>
+                        <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', background: 'rgba(0,0,0,0.2)', flexShrink: 0 }}>
                             <TabButton id="api" icon={Server} label="API y Modelo" />
                             <TabButton id="prompts" icon={MessageSquare} label="Prompts del Sistema" />
                             <TabButton id="advanced" icon={Sliders} label="Avanzado" />
                         </div>
 
-                        {/* Content Content - Scrollable */}
-                        <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-lg)' }}>
+                        {/* Content - Scrollable */}
+                        <div style={{ flex: 1, overflowY: 'auto', padding: 'var(--spacing-lg)', minHeight: 0 }}>
 
                             {/* API TAB */}
                             {activeTab === 'api' && (
@@ -430,7 +430,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         </div>
 
                         {/* Footer */}
-                        <div className="flex-end" style={{ padding: 'var(--spacing-md)', borderTop: '1px solid var(--color-border)', gap: '12px', background: 'rgba(0,0,0,0.2)' }}>
+                        <div className="flex-end" style={{ padding: 'var(--spacing-md)', borderTop: '1px solid var(--color-border)', gap: '12px', background: 'rgba(0,0,0,0.2)', flexShrink: 0 }}>
                             <button
                                 onClick={onClose}
                                 style={{

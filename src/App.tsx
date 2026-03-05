@@ -34,7 +34,7 @@ function App() {
     const [systemPrompts, setSystemPrompts] = useState<SystemPrompts>(DEFAULT_PROMPTS);
     const [apiKey, setApiKey] = useState(() => localStorage.getItem('interiorismo_api_key') || '');
     const [model, setModel] = useState(() => localStorage.getItem('interiorismo_model') || 'gemini-3.1-flash-image-preview');
-    const [isDebug, setIsDebug] = useState(() => localStorage.getItem('interiorismo_debug') !== 'false'); // Default true
+    const [isDebug, setIsDebug] = useState(() => localStorage.getItem('interiorismo_debug') === 'true'); // Default false (production)
 
     // Advanced Settings
     const [upscale, setUpscale] = useState(() => localStorage.getItem('interiorismo_upscale') || '1');
@@ -68,6 +68,12 @@ function App() {
 
     const handleGenerate = async () => {
         if (!image) return;
+
+        if (!isDebug && !apiKey) {
+            setIsSettingsOpen(true);
+            alert('Introduce tu API Key de Google AI Studio en Ajustes para generar renders.');
+            return;
+        }
 
         setIsLoading(true);
         setResult(null);

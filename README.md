@@ -1,81 +1,77 @@
-# Interiorismo AI - Viewport to Render
+# VaroINTAIR - Viewport to Render
 
 ![Banner](public/vite.svg)
 
 **Transforma tus capturas del viewport en renders fotorrealistas profesionales con IA.**
 
-Esta aplicación está diseñada para arquitectos y diseñadores de interiores que desean acelerar su flujo de trabajo. Sube una captura básica de tu modelo 3D, añade referencias de estilo y objetos, y deja que la IA (integrada con Nano Banana Pro) genere visualizaciones impresionantes en segundos.
+Aplicación diseñada para arquitectos y diseñadores de interiores. Sube una captura de tu modelo 3D, añade referencias de estilo y objetos, y genera visualizaciones fotorrealistas con la API gratuita de Google Gemini.
 
 ## 🚀 Características Principales
 
-- **Renderizado AI**: Conversión instantánea de geometría básica a imágenes fotorrealistas.
-- **Editor Avanzado de Canvas**:
-    - **Zonas de Muebles**: Dibuja rectángulos para indicar dónde se debe colocar cada objeto.
-    - **Anotaciones (Pincel)**: Dibuja flechas o notas a mano alzada para dar contexto extra a la IA.
-    - **Máscara Inteligente**: El sistema genera automáticamente una máscara de control para la generación.
-- **Control de Estilo**: Sube imágenes de referencia para guiar la estética, iluminación y materiales.
-- **Integración de Mobiliario**: Añade recortes de muebles u objetos específicos que la IA integrará perfectamente en la escena.
-- **Presets de Prompts**: Guarda y carga diferentes versiones de tus instrucciones de sistema (ej. "Minimalista", "Industrial").
-- **Historial Local**: Opción para guardar o no el historial de generaciones.
-- **Ajustes de Salida**: Soporte para Escalado (Upscale) hasta 4x y formatos PNG, WEBP o JPG.
-- **Diseño Responsivo**: Interfaz optimizada para Móviles, Tablets, PC y TV (100% zoom).
-- **Localización Completa**: Interfaz totalmente en español.
-- **Modo Debug**: Prueba la aplicación sin consumir créditos de API mediante el sistema de Mock integrado.
+- **Renderizado AI con Gemini**: Integración directa con la API REST de Google (Nano Banana 2).
+- **Selector de Modelo**: Elige entre 3 modelos:
+    - ⭐ **Nano Banana 2** (`gemini-3.1-flash-image-preview`) — 500 imágenes/día gratis
+    - ⚡ **Nano Banana** (`gemini-2.5-flash-image`) — Rápido y gratuito
+    - 💎 **Nano Banana Pro** (`gemini-3-pro-image-preview`) — Premium/4K
+- **Editor Avanzado de Canvas**: Zonas, anotaciones a mano alzada y máscara de control.
+- **Multi-Upload**: Hasta 10 imágenes de referencia de estilo + objetos, con comentarios individuales.
+- **Presets de Prompts**: Guarda y carga versiones de tus instrucciones de sistema.
+- **Ajustes de Salida**: Upscale hasta 4x, formatos PNG/WEBP/JPG.
+- **Diseño Responsivo**: Móvil, Tablet, PC y TV.
+- **100% en Español**.
 
 ## 🛠️ Tecnologías
 
 - **Frontend**: React + TypeScript + Vite
-- **Estilos**: CSS Modules con diseño Glassmorphism y temas oscuros premium.
+- **Estilos**: Glassmorphism + Dark Mode premium
 - **Iconos**: Lucide React
 - **Animaciones**: Framer Motion
+- **API**: Google Gemini REST API (generativelanguage.googleapis.com)
 
-## 🤖 Compatibilidad con Nano Banana Pro / Gemini
+## 📦 Instalación Local
 
-Esta aplicación ha sido verificada para funcionar con los modelos **Gemini 1.5 Pro** y **Gemini 2.0 (Nano Banana Pro)**:
-- **Multimodalidad Real**: Puedes subir hasta 10 imágenes de referencia (Estilo + Objetos). La aplicación las envía como partes de un mensaje multimodal entrelazado con texto.
-- **Instrucciones Espaciales**: El Editor de Canvas genera una máscara de control. Al enviar esta máscara junto a tus referencias de objetos, la IA entiende exactamente dónde "colocar" los elementos solicitados.
-- **Contexto Enriquecido**: Los comentarios individuales en cada imagen se adjuntan como metadatos descriptivos en el prompt final.
+```bash
+git clone https://github.com/VaroTv7/varo_design_renders.git
+cd varo_design_renders
+npm install
+npm run dev
+```
 
-## 📦 Instalación y Uso
-
-1.  **Clonar el repositorio**:
-    ```bash
-    git clone https://github.com/VaroTv7/varo_design_renders.git
-    cd varo_design_renders
-    ```
-
-2.  **Instalar dependencias**:
-    ```bash
-    npm install
-    ```
-
-3.  **Iniciar servidor de desarrollo**:
-    ```bash
-    npm run dev
-    ```
-
-4.  **Configurar API**:
-    - Abre la aplicación en tu navegador.
-    - Haz clic en el icono de **Ajustes** (engranaje).
-    - Desactiva el "Modo Debug".
-    - Introduce tu API Key de Nano Banana Pro.
+Abre `http://localhost:5173` → Ajustes → Introduce tu API Key de [Google AI Studio](https://aistudio.google.com/apikey) → ¡Listo!
 
 ## 🐳 Despliegue con Docker
 
-Puedes desplegar la aplicación fácilmente en cualquier servidor usando Docker.
+```bash
+# Clonar
+git clone https://github.com/VaroTv7/varo_design_renders.git
+cd varo_design_renders
 
-1.  **Construir y ejecutar**:
-    ```bash
-    docker-compose up -d --build
-    ```
+# Construir y levantar
+docker-compose up -d --build
 
-2.  **Acceder**:
-    La aplicación estará disponible en `http://localhost:8080`.
+# Acceder
+# http://localhost:8080
+```
+
+Para cambiar el puerto, edita `docker-compose.yml`:
+```yaml
+ports:
+  - "TU_PUERTO:80"
+```
+
+## 🔑 Obtener API Key (Gratis)
+
+1. Ve a [Google AI Studio](https://aistudio.google.com/apikey)
+2. Inicia sesión con tu cuenta de Google
+3. Crea una nueva API Key
+4. Pégala en **Ajustes → API y Modelo → API Key**
+
+> **500 imágenes/día gratis** con Nano Banana 2. Sin tarjeta de crédito.
 
 ## 🤝 Contribución
 
-Las contribuciones son bienvenidas. Por favor, abre un issue para discutir cambios mayores antes de enviar un Pull Request.
+Las contribuciones son bienvenidas. Abre un issue para discutir cambios mayores.
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT.
+MIT
