@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, RotateCcw, Server, MessageSquare, Sliders, Info, Plus, Trash2 } from 'lucide-react';
+import { X, Save, RotateCcw, Server, MessageSquare, Sliders, Info, Plus, Trash2, CheckCircle2, AlertCircle, ExternalLink, RefreshCw, Key, Database, Code, FlaskConical, Layout as LayoutIcon, Settings as SettingsIconLucide } from 'lucide-react';
+import { testConnection } from '../services/api';
 import { motion, AnimatePresence } from 'framer-motion';
 import '../styles/modal.css';
 
@@ -62,6 +63,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [presets, setPresets] = useState<Preset[]>([]);
     const [selectedPreset, setSelectedPreset] = useState<string>('');
 
+    // API Testing State
+    const [testStatus, setTestStatus] = useState<{ type: 'idle' | 'loading' | 'success' | 'error', message: string }>({ type: 'idle', message: '' });
+
+    const handleTestConnection = async () => {
+        setTestStatus({ type: 'loading', message: 'Verificando con Google...' });
+        const result = await testConnection(apiKey, model);
+        if (result.success) {
+            setTestStatus({ type: 'success', message: result.message });
+        } else {
+            setTestStatus({ type: 'error', message: result.message });
+        }
+    };
+
     useEffect(() => {
         if (isOpen) {
             setLocalPrompts(prompts);
@@ -72,6 +86,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             setFormat(initialFormat);
             setHistory(initialHistory);
             setActiveTab('api');
+            setTestStatus({ type: 'idle', message: '' });
 
             // Load presets
             const savedPresets = localStorage.getItem('interiorismo_prompt_presets');
@@ -225,7 +240,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                                 <div>
                                                     <label style={{ display: 'block', marginBottom: '8px', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                                                        Modelo de IA
+                                                        Modelo de IA (Nano Banana Series)
                                                     </label>
                                                     <select
                                                         className="input-field"
@@ -233,16 +248,67 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                                         onChange={(e) => setModel(e.target.value)}
                                                         style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: model.includes('pro') ? '1px solid var(--color-accent)' : '1px solid var(--color-border)' }}
                                                     >
-                                                        <option value="gemini-3-pro-image-preview">💎 Nano Banana Pro (Calidad Premium — Recomendado Pago)</option>
-                                                        <option value="gemini-2.0-flash">🚀 Gemini 2.0 Flash (Estable — 1500 renders/día gratis)</option>
-                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (High Efficiency — Requiere Billing)</option>
-                                                        <option value="gemini-2.5-flash-image">⚡ Nano Banana (Ultra Rápido — Gratis)</option>
+                                                        <option value="gemini-3-pro-image-preview">💎 Nano Banana Pro (Gemini 3 Pro Image — Recomendado Pago/Pro)</option>
+                                                        <option value="gemini-3.1-flash-image-preview">⭐ Nano Banana 2 (Gemini 3.1 Flash Image — Alta Eficiencia)</option>
+                                                        <option value="gemini-2.5-flash-image">⚡ Nano Banana (Gemini 2.5 Flash Image — Rápido/Gratis)</option>
+                                                        <option value="gemini-2.0-flash">🚀 Gemini 2.0 Flash (Multimodal Estable — Backup)</option>
                                                     </select>
-                                                    <p style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)', marginTop: '8px', lineHeight: '1.4' }}>
-                                                        💡 <strong>Para usuarios Pro:</strong> Si pagas por la API, asegúrate de haber vinculado una "Cuenta de Facturación" en tu proyecto de <a href="https://console.cloud.google.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Google Cloud</a>.
-                                                        <br />
-                                                        <em>Nota: Pagar la suscripción "Gemini Advanced" de 20€/mes no da créditos para esta API; se factura aparte por imagen generada.</em>
-                                                    </p>
+
+                                                    <button
+                                                        onClick={handleTestConnection}
+                                                        disabled={testStatus.type === 'loading' || !apiKey}
+                                                        style={{
+                                                            marginTop: '12px',
+                                                            width: '100%',
+                                                            padding: '10px',
+                                                            borderRadius: 'var(--radius-sm)',
+                                                            background: 'rgba(100, 243, 213, 0.1)',
+                                                            border: '1px solid rgba(100, 243, 213, 0.3)',
+                                                            color: 'var(--color-accent)',
+                                                            cursor: (testStatus.type === 'loading' || !apiKey) ? 'not-allowed' : 'pointer',
+                                                            fontSize: '0.85rem',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            gap: '8px',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                    >
+                                                        {testStatus.type === 'loading' ? <RefreshCw size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                                                        Probar Conexión y Cuota 0
+                                                    </button>
+
+                                                    {testStatus.type !== 'idle' && (
+                                                        <div style={{
+                                                            marginTop: '10px',
+                                                            padding: '10px',
+                                                            borderRadius: '4px',
+                                                            fontSize: '0.8rem',
+                                                            background: testStatus.type === 'success' ? 'rgba(0,255,100,0.05)' : 'rgba(255,0,0,0.05)',
+                                                            border: `1px solid ${testStatus.type === 'success' ? 'rgba(0,255,100,0.2)' : 'rgba(255,0,0,0.2)'}`,
+                                                            color: testStatus.type === 'success' ? '#50fa7b' : '#ff5555',
+                                                            whiteSpace: 'pre-wrap'
+                                                        }}>
+                                                            {testStatus.message}
+                                                        </div>
+                                                    )}
+
+                                                    <div style={{
+                                                        marginTop: '20px',
+                                                        padding: '12px',
+                                                        background: 'rgba(255,255,255,0.03)',
+                                                        borderRadius: 'var(--radius-md)',
+                                                        border: '1px solid rgba(255,255,255,0.05)'
+                                                    }}>
+                                                        <h4 style={{ fontSize: '0.85rem', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', color: 'white' }}>
+                                                            <Info size={14} color="var(--color-accent)" /> Ayuda para Usuarios Pro
+                                                        </h4>
+                                                        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', lineHeight: '1.4', margin: 0 }}>
+                                                            ⚠️ Si tienes la suscripción <strong>Gemini Advanced</strong> de 20€/mes, esta NO te da créditos para la API.
+                                                            <br /><br />
+                                                            Para usar los modelos Pro aquí, necesitas asociar una "Tarjeta de Facturación" directamente en la <a href="https://console.cloud.google.com/billing" target="_blank" rel="noreferrer" style={{ color: 'var(--color-accent)' }}>Consola de Google Cloud</a> de tu proyecto.
+                                                        </p>
+                                                    </div>
                                                 </div>
 
                                                 <div>

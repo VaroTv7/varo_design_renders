@@ -106,10 +106,9 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
         });
     }
 
-    // --- Real Gemini API Call ---
     try {
         if (!request.apiKey) {
-            throw new Error("Falta la API Key. Ve a Ajustes → API y Modelo para configurarla.");
+            return { imageUrl: '', error: "Falta la API Key. Ve a Ajustes → API y Modelo para configurarla." };
         }
 
         const model = request.model || 'gemini-2.0-flash';
@@ -118,7 +117,7 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
         // Build multimodal parts array
         const parts: Array<{ text: string } | { inline_data: { mime_type: string; data: string } }> = [];
 
-        // 1. System instruction + User prompt
+        // 1. System context + User prompt
         const systemContext = [
             request.systemPrompts.styleCheck,
             request.systemPrompts.objectIntegration,
@@ -129,135 +128,130 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             text: `${systemContext}\n\n--- Instrucciones del Usuario ---\n${request.prompt}`
         });
 
-        // 2. Base viewport image
+        // 2. Base images
+        request.onProgress?.("Comprimiendo imágenes...");
         const base64Image = await fileToBase64(request.image);
         parts.push({
             inline_data: {
-                mime_type: request.image.type || 'image/png',
+                mime_type: 'image/webp',
                 data: base64Image
             }
         });
 
-        // 3. Mask / Annotations (if exists)
         if (request.mask) {
-            parts.push({ text: "Máscara de control con anotaciones espaciales:" });
             const base64Mask = await blobToBase64(request.mask);
             parts.push({
                 inline_data: {
-                    mime_type: 'image/png',
+                    mime_type: 'image/webp',
                     data: base64Mask
                 }
             });
         }
 
-        // 4. Style References
-        if (request.styleRefs.length > 0) {
-            parts.push({ text: "Imágenes de referencia de estilo:" });
-            for (const ref of request.styleRefs) {
-                if (ref.comment) {
-                    parts.push({ text: `Nota de estilo: ${ref.comment}` });
+        // 3. Style Refs
+        for (const ref of request.styleRefs) {
+            const b64 = await fileToBase64(ref.file);
+            parts.push({
+                inline_data: {
+                    mime_type: 'image/webp',
+                    data: b64
                 }
-                const b64 = await fileToBase64(ref.file);
-                parts.push({
-                    inline_data: {
-                        mime_type: ref.file.type || 'image/png',
-                        data: b64
-                    }
-                });
-            }
+            });
         }
 
-        // 5. Object / Furniture References
-        if (request.objectRefs.length > 0) {
-            parts.push({ text: "Objetos y muebles a integrar en la escena:" });
-            for (const ref of request.objectRefs) {
-                if (ref.comment) {
-                    parts.push({ text: `Descripción del objeto: ${ref.comment}` });
+        // 4. Object Refs
+        for (const ref of request.objectRefs) {
+            const b64 = await fileToBase64(ref.file);
+            parts.push({
+                inline_data: {
+                    mime_type: 'image/webp',
+                    data: b64
                 }
-                const b64 = await fileToBase64(ref.file);
-                parts.push({
-                    inline_data: {
-                        mime_type: ref.file.type || 'image/png',
-                        data: b64
-                    }
-                });
-            }
+            });
         }
 
-        // Final prompt to reinforce image generation
         parts.push({
-            text: "Genera una imagen fotorrealista de alta calidad basada en la captura del viewport, aplicando el estilo y los objetos proporcionados. Devuelve SOLO la imagen generada."
+            text: "Genera una imagen fotorrealista de alta calidad. Devuelve SOLO la imagen generada."
         });
 
-        // Build payload
         const payload = {
-            contents: [{
-                parts: parts
-            }],
+            contents: [{ parts }],
             generationConfig: {
                 temperature: 0.4,
                 maxOutputTokens: 8192,
+                // Si el usuario es Pro, forzar alta resolución si se desea
+                ...(model.includes('pro') ? { image_size: '2K' } : {})
             }
         };
 
-        request.onProgress?.("Analizando y enviando...");
-        console.log('[Gemini API] Sending request to:', endpoint);
-        console.log('[Gemini API] Parts count:', parts.length);
-
-        // Execute request
+        request.onProgress?.("Enviando a la IA...");
         const response = await fetch(`${endpoint}?key=${request.apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
-        request.onProgress?.("Procesando render...");
+        request.onProgress?.("Procesando respuesta...");
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
-            const errorMsg = (errorData as any)?.error?.message || `HTTP ${response.status}: ${response.statusText}`;
-            throw new Error(`Error de API: ${errorMsg}`);
+            let errorMsg = (errorData as any)?.error?.message || `HTTP ${response.status}`;
+
+            if (errorMsg.includes("limit: 0")) {
+                errorMsg = `⚠️ Error de Cuota (Límite 0): Google ha bloqueado este modelo para tu proyecto.\n\nESTO SUELE PASAR SI:\n1. Tienes "Gemini Advanced" pero NO has configurado "Facturación" en Google Cloud.\n2. Tu clave de API es de un proyecto gratuito que Google ha limitado temporalmente.\n\nSOLUCIÓN: Ve a console.cloud.google.com/billing y vincula tu tarjeta.`;
+            }
+            return { imageUrl: '', error: errorMsg };
         }
 
         const data = await response.json();
-
-        // Parse response - look for image data in parts
         const candidates = (data as any)?.candidates;
-        if (!candidates || candidates.length === 0) {
-            throw new Error("La API no devolvió candidatos. Intenta con un prompt diferente.");
+
+        if (!candidates?.[0]?.content?.parts) {
+            return { imageUrl: '', error: "La IA no devolvió ninguna imagen. Revisa el prompt." };
         }
 
-        const responseParts = candidates[0]?.content?.parts;
-        if (!responseParts) {
-            throw new Error("Respuesta vacía de la API.");
-        }
-
-        // Find the image part
-        for (const part of responseParts) {
+        for (const part of candidates[0].content.parts) {
             if (part.inlineData || part.inline_data) {
                 const imgData = part.inlineData || part.inline_data;
-                const mimeType = imgData.mimeType || imgData.mime_type || 'image/png';
                 const base64Data = imgData.data;
-                const imageUrl = `data:${mimeType};base64,${base64Data}`;
-
-                console.log('[Gemini API] ✅ Image received successfully');
-                return { imageUrl };
+                const mimeType = imgData.mimeType || imgData.mime_type || 'image/png';
+                return { imageUrl: `data:${mimeType};base64,${base64Data}` };
             }
         }
 
-        // If no image found, check if there's text describing why
-        const textParts = responseParts.filter((p: any) => p.text).map((p: any) => p.text).join('\n');
-        if (textParts) {
-            throw new Error(`La API respondió con texto en lugar de imagen: "${textParts.substring(0, 200)}"`);
-        }
-
-        throw new Error("La respuesta no contiene una imagen. Intenta con un prompt más descriptivo.");
+        return { imageUrl: '', error: "No se encontró imagen en la respuesta de Gemini." };
 
     } catch (error) {
         console.error('[API Error]', error);
-        return {
-            imageUrl: '',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        };
+        return { imageUrl: '', error: error instanceof Error ? error.message : 'Error desconocido' };
+    }
+};
+
+export const testConnection = async (apiKey: string, model: string): Promise<{ success: boolean; message: string }> => {
+    if (!apiKey) return { success: false, message: "No hay API Key para probar." };
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+
+    try {
+        const response = await fetch(`${endpoint}?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: "ping" }] }],
+                generationConfig: { maxOutputTokens: 1 }
+            })
+        });
+
+        if (response.ok) {
+            return { success: true, message: "✅ ¡Conexión exitosa! Tu API Key tiene cuota activa para este modelo." };
+        } else {
+            const data = await response.json().catch(() => ({}));
+            const msg = data?.error?.message || `Error ${response.status}`;
+            if (msg.includes("limit: 0")) {
+                return { success: false, message: "❌ ERROR DE CUOTA (Límite 0): Revisa tu facturación en Google Cloud." };
+            }
+            return { success: false, message: `❌ Error: ${msg}` };
+        }
+    } catch (e) {
+        return { success: false, message: "❌ Error de red al contactar con Google." };
     }
 };
