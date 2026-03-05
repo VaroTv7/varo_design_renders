@@ -179,8 +179,6 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             generationConfig: {
                 temperature: 0.4,
                 maxOutputTokens: 8192,
-                // Si el usuario es Pro, forzar alta resolución si se desea
-                ...(model.includes('pro') ? { image_size: '2K' } : {})
             }
         };
 
