@@ -23,6 +23,18 @@ export interface GenerationResponse {
 
 // --- Helpers ---
 
+const getImageDimensions = (file: File | Blob): Promise<{ width: number, height: number }> => {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.src = URL.createObjectURL(file);
+        img.onload = () => {
+            URL.revokeObjectURL(img.src);
+            resolve({ width: img.width, height: img.height });
+        };
+        img.onerror = reject;
+    });
+};
+
 const compressImage = (file: File | Blob, maxWidth = 1920, maxHeight = 1920): Promise<Blob> => {
     return new Promise((resolve, reject) => {
         const img = new Image();
@@ -114,6 +126,16 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
         const model = request.model || 'gemini-2.0-flash';
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
+        // Get base image dimensions to enforce aspect ratio
+        const baseDims = await getImageDimensions(request.image);
+        const ratio = baseDims.width / baseDims.height;
+        let aspectRatioStr = `${baseDims.width}x${baseDims.height}`;
+        if (ratio >= 1.7) aspectRatioStr += " (Formato Panorámico Horizontal aprox 16:9)";
+        else if (ratio >= 1.3) aspectRatioStr += " (Formato Horizontal aprox 4:3)";
+        else if (ratio >= 0.9 && ratio <= 1.1) aspectRatioStr += " (Formato Cuadrado 1:1)";
+        else if (ratio >= 0.7) aspectRatioStr += " (Formato Vertical aprox 3:4)";
+        else aspectRatioStr += " (Formato Vertical Panorámico aprox 9:16)";
+
         // Build multimodal parts array with properly labeled images
         const parts: Array<{ text: string } | { inline_data: { mime_type: string; data: string } }> = [];
 
@@ -127,7 +149,7 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             request.prompt,
             '',
             'REGLAS OBLIGATORIAS:',
-            '1. La imagen generada DEBE mantener EXACTAMENTE la misma resolución, perspectiva y relación de aspecto que la IMAGEN BASE.',
+            `1. ASPECT RATIO ESTRICTO: La imagen generada DEBE tener exactamente la misma relación de aspecto que la IMAGEN BASE original (${aspectRatioStr}). ¡PROHIBIDO generar imágenes cuadradas si la base es panorámica, no copies el formato de los muebles!`,
             '2. Las REFERENCIAS DE ESTILO solo definen la estética (colores, materiales, iluminación). NO copies su composición ni layout.',
             '3. Los OBJETOS/MUEBLES deben integrarse de forma natural en el espacio base, respetando la perspectiva, escala y sombras.',
             '4. El resultado debe ser una fotografía fotorrealista de revista de arquitectura.',
