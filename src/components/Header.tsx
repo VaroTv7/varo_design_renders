@@ -22,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenSettings }) => {
             <div className="flex-center" style={{ gap: 'var(--spacing-sm)' }}>
                 <Layers className="text-accent" size={24} style={{ color: 'var(--color-accent)' }} />
                 <h1 style={{ fontSize: 'var(--font-size-lg)', fontWeight: 'bold', letterSpacing: '-0.5px' }}>
-                    Varo<span style={{ color: 'var(--color-accent)' }}>INT</span>AIR
+                    Varo<span style={{ color: 'var(--color-accent)' }}>IntAi</span> Designs
                 </h1>
             </div>
 

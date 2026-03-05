@@ -1,6 +1,6 @@
-# VaroINTAIR - Viewport to Render
+# VaroIntAi Designs — Viewport to Render
 
-![Banner](public/vite.svg)
+![VaroIntAi Designs](public/logo.png)
 
 **Transforma tus capturas del viewport en renders fotorrealistas profesionales con IA.**
 
