@@ -114,73 +114,74 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
         const model = request.model || 'gemini-2.0-flash';
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
-        // Build multimodal parts array
+        // Build multimodal parts array with properly labeled images
         const parts: Array<{ text: string } | { inline_data: { mime_type: string; data: string } }> = [];
 
-        // 1. System context + User prompt
-        const systemContext = [
-            request.systemPrompts.styleCheck,
-            request.systemPrompts.objectIntegration,
-            request.systemPrompts.finalRender
-        ].filter(Boolean).join('\n\n');
+        // ---- 1. MASTER PROMPT: System context + role + user instructions (ONCE) ----
+        const masterPrompt = [
+            `ROL: ${request.systemPrompts.styleCheck}`,
+            `INTEGRACIÓN DE OBJETOS: ${request.systemPrompts.objectIntegration}`,
+            `CALIDAD FINAL: ${request.systemPrompts.finalRender}`,
+            '',
+            '--- INSTRUCCIONES DEL USUARIO ---',
+            request.prompt,
+            '',
+            'REGLAS OBLIGATORIAS:',
+            '1. La imagen generada DEBE mantener EXACTAMENTE la misma resolución, perspectiva y relación de aspecto que la IMAGEN BASE.',
+            '2. Las REFERENCIAS DE ESTILO solo definen la estética (colores, materiales, iluminación). NO copies su composición ni layout.',
+            '3. Los OBJETOS/MUEBLES deben integrarse de forma natural en el espacio base, respetando la perspectiva, escala y sombras.',
+            '4. El resultado debe ser una fotografía fotorrealista de revista de arquitectura.',
+            request.upscale === 2 ? '5. Aumenta el detalle y la nitidez para un resultado de alta resolución.' : '',
+        ].filter(Boolean).join('\n');
 
-        parts.push({
-            text: `${systemContext}\n\n--- Instrucciones del Usuario ---\n${request.prompt}`
-        });
+        parts.push({ text: masterPrompt });
 
-        // 2. Base images
+        // ---- 2. BASE IMAGE (the viewport capture to transform) ----
         request.onProgress?.("Comprimiendo imágenes...");
+        parts.push({ text: '[IMAGEN BASE DEL ESPACIO — Esta es la fotografía principal a transformar. Mantén su composición, perspectiva y proporciones exactas]:' });
         const base64Image = await fileToBase64(request.image);
         parts.push({
-            inline_data: {
-                mime_type: 'image/webp',
-                data: base64Image
-            }
+            inline_data: { mime_type: 'image/webp', data: base64Image }
         });
 
+        // ---- 3. MASK (optional editing zones) ----
         if (request.mask) {
+            parts.push({ text: '[MÁSCARA DE EDICIÓN — Las zonas marcadas indican dónde aplicar cambios]:' });
             const base64Mask = await blobToBase64(request.mask);
             parts.push({
-                inline_data: {
-                    mime_type: 'image/webp',
-                    data: base64Mask
-                }
+                inline_data: { mime_type: 'image/webp', data: base64Mask }
             });
         }
 
-        // 3. Style Refs
-        for (const ref of request.styleRefs) {
+        // ---- 4. STYLE REFERENCES (aesthetic inspiration only) ----
+        for (let i = 0; i < request.styleRefs.length; i++) {
+            const ref = request.styleRefs[i];
+            const label = ref.comment
+                ? `[REFERENCIA DE ESTILO ${i + 1} — ${ref.comment}. Usa SOLO su estética, colores y materiales. NO copies su layout]:`
+                : `[REFERENCIA DE ESTILO ${i + 1} — Usa SOLO su estética, colores y materiales. NO copies su layout]:`;
+            parts.push({ text: label });
             const b64 = await fileToBase64(ref.file);
             parts.push({
-                inline_data: {
-                    mime_type: 'image/webp',
-                    data: b64
-                }
+                inline_data: { mime_type: 'image/webp', data: b64 }
             });
         }
 
-        // 4. Object Refs
-        for (const ref of request.objectRefs) {
+        // ---- 5. OBJECTS / FURNITURE to integrate ----
+        for (let i = 0; i < request.objectRefs.length; i++) {
+            const ref = request.objectRefs[i];
+            const label = ref.comment
+                ? `[OBJETO/MUEBLE ${i + 1} — ${ref.comment}. Intégralo naturalmente en el espacio base respetando perspectiva y escala]:`
+                : `[OBJETO/MUEBLE ${i + 1} — Intégralo naturalmente en el espacio base respetando perspectiva y escala]:`;
+            parts.push({ text: label });
             const b64 = await fileToBase64(ref.file);
             parts.push({
-                inline_data: {
-                    mime_type: 'image/webp',
-                    data: b64
-                }
+                inline_data: { mime_type: 'image/webp', data: b64 }
             });
         }
 
+        // ---- 6. FINAL INSTRUCTION ----
         parts.push({
-            text: `
-                IMPORTANTE: Genera una imagen que mantenga EXACTAMENTE la misma resolución y relación de aspecto que la PRIMERA imagen proporcionada (la captura del espacio).
-                
-                Actúa como un experto Diseñador de Interiores y Arquitecto. 
-                Transforma este espacio siguiendo estas instrucciones:
-                ${request.prompt}
-                
-                ${request.upscale === 2 ? 'Aumenta el detalle y la nitidez para un resultado de alta resolución.' : ''}
-                Garantiza que el estilo sea coherente y fotorrealista. Devuelve SOLO la imagen generada.
-            `
+            text: 'Genera la imagen final transformada. Devuelve SOLO la imagen, sin texto.'
         });
 
         const payload = {
@@ -188,6 +189,7 @@ export const generateRender = async (request: GenerationRequest): Promise<Genera
             generationConfig: {
                 temperature: 0.4,
                 maxOutputTokens: 8192,
+                responseModalities: ["TEXT", "IMAGE"],
             }
         };
 

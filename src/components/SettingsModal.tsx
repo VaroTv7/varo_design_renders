@@ -11,9 +11,9 @@ export interface SystemPrompts {
 }
 
 export const DEFAULT_PROMPTS: SystemPrompts = {
-    styleCheck: "Eres un experto en diseño de interiores y renderizado arquitectónico. Analiza la imagen base del viewport y las referencias de estilo proporcionadas. Extrae la paleta de colores, materiales, iluminación y atmósfera general para aplicarlos al render final.",
-    objectIntegration: "Identifica los objetos y muebles en las imágenes de referencia. Intégralos de forma natural en la escena respetando la perspectiva, la escala, las sombras y la iluminación del entorno. Los objetos deben parecer parte orgánica del espacio.",
-    finalRender: "Genera un render fotorrealista de alta calidad profesional. El resultado debe parecer una fotografía de revista de arquitectura: iluminación natural suave, materiales realistas, reflejos sutiles y profundidad de campo. Mantén la composición y perspectiva de la imagen original."
+    styleCheck: "Eres un experto en diseño de interiores y renderizado arquitectónico. Analiza la IMAGEN BASE del viewport y extrae su composición, perspectiva y geometría. Si se proporcionan REFERENCIAS DE ESTILO, extrae SOLO su paleta de colores, materiales, iluminación y atmósfera — NUNCA copies su composición o layout.",
+    objectIntegration: "Cuando se proporcionan imágenes de OBJETOS/MUEBLES, intégralos de forma natural en la escena base respetando estrictamente la perspectiva, la escala, las sombras y la iluminación existentes. Los objetos deben parecer parte orgánica del espacio, no un collage pegado.",
+    finalRender: "Genera un render fotorrealista de calidad profesional. El resultado debe parecer una fotografía de revista de arquitectura: iluminación natural suave, materiales realistas, reflejos sutiles y profundidad de campo. SIEMPRE mantén la composición, perspectiva y proporciones exactas de la imagen base original."
 };
 
 interface Preset {
